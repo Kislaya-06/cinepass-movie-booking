@@ -3,6 +3,9 @@ spring:
     name: movie-reservation-system
   profiles:
     active: dev
+  # Local secrets (TMDB_API_KEY=..., DB_PASSWORD=...) in a gitignored .env at the project root; skipped if absent
+  config:
+    import: optional:file:.env[.properties]
   # dev/test build the schema with ddl-auto; only prod runs migrations
   flyway:
     enabled: false

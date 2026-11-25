@@ -17,7 +17,7 @@
                 <button class="btn btn-sm btn-outline-custom text-nowrap d-inline-flex align-items-center gap-2" type="button" data-bs-toggle="modal" data-bs-target="#citySelectModal" id="navCityBtn">
                     <i class="fa-solid fa-location-dot text-accent"></i>
                     <span id="navCityName" class="fw-semibold text-nowrap">Mumbai</span>
-                    <i class="fa-solid fa-chevron-down small text-secondary-subtle"></i>
+                    <i class="fa-solid fa-chevron-down small text-secondary-subtle d-none d-sm-inline"></i>
                 </button>
             </div>
         </div>
@@ -35,26 +35,26 @@
             <a th:href="@{/}" class="bms-nav-link d-none d-sm-flex">
                 <i class="fa-solid fa-film"></i> Movies
             </a>
-            <a sec:authorize="isAuthenticated()" th:href="@{/my-bookings}" class="bms-nav-link">
+            <a sec:authorize="isAuthenticated()" th:href="@{/my-bookings}" class="bms-nav-link d-none d-lg-flex">
                 <i class="fa-solid fa-receipt"></i> My Bookings
             </a>
-            <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/dashboard}" class="bms-nav-link text-gold">
+            <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/dashboard}" class="bms-nav-link d-none d-lg-flex text-gold">
                 <i class="fa-solid fa-shield-halved"></i> Admin
             </a>
 
             <!-- Anonymous: Sign In Button -->
             <div sec:authorize="isAnonymous()" class="ms-2">
-                <a th:href="@{/login}" class="btn btn-accent btn-sm px-3">
-                    <i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In
+                <a th:href="@{/login}" class="btn btn-accent btn-sm px-3 text-nowrap">
+                    <i class="fa-solid fa-arrow-right-to-bracket d-none d-sm-inline"></i> Sign In
                 </a>
             </div>
 
             <!-- Authenticated: User Menu & Sign Out -->
             <div sec:authorize="isAuthenticated()" class="d-flex align-items-center gap-2 ms-2">
                 <div class="dropdown">
-                    <button class="btn btn-sm btn-outline-custom dropdown-toggle text-white d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown">
+                    <button class="btn btn-sm btn-outline-custom dropdown-toggle text-white d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-label="Account menu">
                         <i class="fa-solid fa-circle-user text-accent"></i>
-                        <span sec:authentication="principal.name">User</span>
+                        <span class="d-none d-sm-inline" sec:authentication="principal.name">User</span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow-lg">
                         <li><a class="dropdown-item" th:href="@{/my-bookings}"><i class="fa-solid fa-ticket me-2 text-accent"></i>My Bookings</a></li>

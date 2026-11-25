@@ -677,6 +677,8 @@ a:hover {
   max-width: 960px;
   margin: 0 auto;
   padding: 1.5rem 1rem 6rem 1rem;
+  /* wide halls scroll sideways on phones instead of squeezing seats */
+  overflow-x: auto;
 }
 
 .cinema-screen-wrap {
@@ -726,7 +728,7 @@ a:hover {
 .seat-row {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: safe center;
   gap: 0.5rem;
   margin-bottom: 0.6rem;
 }
@@ -746,6 +748,7 @@ a:hover {
 .seat-btn {
   width: 32px;
   height: 32px;
+  flex-shrink: 0;
   border-radius: 6px;
   background: #171724;
   border: 1px solid #32324a;
@@ -997,9 +1000,42 @@ a:hover {
 
 .admin-main {
   flex-grow: 1;
+  min-width: 0; /* let wide tables scroll inside .table-responsive instead of stretching the page */
   padding: 2rem;
   background: var(--bg-main);
   overflow-y: auto;
+}
+
+/* Below lg the sidebar becomes a horizontal tab strip above the content */
+@media (max-width: 991.98px) {
+  .admin-layout {
+    flex-direction: column;
+  }
+
+  .admin-sidebar {
+    width: auto;
+    padding: 0.75rem 1rem;
+    border-right: 0;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .admin-sidebar nav {
+    flex-direction: row !important;
+    overflow-x: auto;
+  }
+
+  .admin-sidebar nav hr {
+    display: none;
+  }
+
+  .admin-nav-item {
+    white-space: nowrap;
+    margin-bottom: 0;
+  }
+
+  .admin-main {
+    padding: 1rem;
+  }
 }
 
 .stat-card {

@@ -12,9 +12,10 @@
                 <div class="d-inline-flex align-items-center justify-content-center p-4 rounded-circle mb-3" style="background: rgba(225, 54, 86, 0.15); border: 1px solid rgba(225, 54, 86, 0.3);">
                     <i class="fa-solid fa-film text-accent display-4"></i>
                 </div>
-                <div class="display-3 fw-bold text-white mb-2" th:text="${errorCode} ?: '404'">404</div>
+                <div class="display-3 fw-bold text-white mb-2" th:text="${errorCode ?: status ?: 404}">404</div>
                 <h4 class="fw-bold text-white mb-2">Film Reel Interrupted</h4>
-                <p class="text-secondary-subtle" th:text="${errorMessage} ?: 'Oops! The movie, theater, or showtime you are looking for has moved or does not exist.'">
+                <!-- errorCode/errorMessage come from GlobalExceptionHandler; Spring Security errors (403) only set status -->
+                <p class="text-secondary-subtle" th:text="${errorMessage ?: (status == 403 ? 'You do not have permission to open this page. Admin pages need an admin account.' : 'Oops! The movie, theater, or showtime you are looking for has moved or does not exist.')}">
                     Oops! The movie, theater, or showtime you are looking for has moved or does not exist.
                 </p>
             </div>
