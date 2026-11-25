@@ -21,13 +21,14 @@ public class UserService {
 
     @Transactional
     public User registerUser(UserRegisterRequestDto request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new ApplicationException("Email '" + request.getEmail() + "' is already registered. Please sign in or use another email.");
+        String email = request.getEmail().trim().toLowerCase();
+        if (userRepository.existsByEmail(email)) {
+            throw new ApplicationException("Email '" + email + "' is already registered. Please sign in or use another email.");
         }
 
         User user = User.builder()
                 .name(request.getName().trim())
-                .email(request.getEmail().trim().toLowerCase())
+                .email(email)
                 .password(passwordEncoder.encode(request.getPassword()))
                 .phoneNumber(request.getPhoneNumber() != null ? request.getPhoneNumber().trim() : null)
                 .role(Role.USER)

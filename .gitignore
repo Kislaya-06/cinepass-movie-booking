@@ -4,7 +4,8 @@ target/
 # Local H2 dev database (contains seeded users and bookings)
 data/
 
-# IDE / OS
+# IDE / OS (.claude holds machine-specific launch scripts)
+.claude/
 .vscode/
 .idea/
 *.iml
