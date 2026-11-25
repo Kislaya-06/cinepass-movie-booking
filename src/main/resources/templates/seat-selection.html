@@ -45,6 +45,7 @@
 
         <!-- Seat map: price tiers from the back of the hall, screen at the bottom -->
         <div class="seat-view-container">
+            <div class="seat-hall">
             <th:block th:with="rows=${seatsByRow.entrySet().toArray()}">
             <th:block th:each="rowEntry, rs : ${rows}">
             <div class="seat-tier-header" th:if="${rs.first or rows[rs.index - 1].value[0].seatType != rowEntry.value[0].seatType}"
@@ -67,6 +68,7 @@
             </div>
             </th:block>
             </th:block>
+            </div>
 
             <div class="cinema-screen-wrap cinema-screen-bottom">
                 <div class="cinema-screen-arc"></div>
@@ -100,7 +102,40 @@
                 </form>
             </div>
         </div>
+        <!-- Pops up above the tapped seat -->
+        <button type="button" id="view3dBtn" class="view-3d-btn" hidden>
+            <i class="fa-solid fa-cube me-1" aria-hidden="true"></i>View in 3D
+        </button>
     </main>
+
+    <!-- 3D view from the seat (three.js is loaded only when this opens) -->
+    <div class="modal fade" id="seat3dModal" tabindex="-1" aria-labelledby="seat3dTitle" aria-hidden="true"
+         th:data-module="@{/js/seat-3d.js}" th:data-title="${showtime.movie.title}">
+        <div class="modal-dialog modal-dialog-centered modal-lg modal-fullscreen-sm-down">
+            <div class="modal-content seat3d">
+                <h2 id="seat3dTitle" class="visually-hidden">3D view from your seat</h2>
+                <div id="seat3dStage" class="seat3d-stage" tabindex="0" role="img" aria-label="3D view from your seat"></div>
+                <div class="seat3d-top">
+                    <div class="seat3d-tabs" role="group" aria-label="Camera">
+                        <button type="button" class="active" data-view="seat" aria-pressed="true">Seat</button>
+                        <button type="button" data-view="hall" aria-pressed="false">Hall</button>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="seat3d-chip" id="seat3dGuideBtn" aria-expanded="false" aria-controls="seat3dGuide">Guide</button>
+                        <button type="button" class="seat3d-chip seat3d-icon" id="seat3dReplay" aria-label="Replay walk to seat">
+                            <i class="fa-solid fa-rotate-right" aria-hidden="true"></i>
+                        </button>
+                        <button type="button" class="seat3d-chip seat3d-icon" data-bs-dismiss="modal" aria-label="Close">
+                            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+                <div id="seat3dGuide" class="seat3d-guide" hidden></div>
+                <div id="seat3dLoading" class="seat3d-loading">Loading 3D view…</div>
+                <div id="seat3dCaption" class="seat3d-caption" aria-live="polite"></div>
+            </div>
+        </div>
+    </div>
 
     <!-- How many seats? (opens on load) -->
     <div class="modal fade" id="seatCountModal" tabindex="-1" aria-labelledby="seatCountTitle" aria-hidden="true">

@@ -51,6 +51,102 @@ function initSeatSelection() {
     // On phones the hall is wider than the screen: start with the centre block in view
     const map = document.querySelector('.seat-view-container');
     if (map) map.scrollLeft = (map.scrollWidth - map.clientWidth) / 2;
+    // The tilt shrinks the hall on screen; pull it up so no empty band is left above the back row
+    const hall = document.querySelector('.seat-hall');
+    if (hall) hall.style.marginTop = `${hall.getBoundingClientRect().height - hall.offsetHeight}px`;
+
+    // "View in 3D": a small button above the tapped seat opens the 3D hall from that seat
+    const view3dBtn = document.getElementById('view3dBtn');
+    const modal3d = document.getElementById('seat3dModal');
+    let view3dSeat = null;
+    let viewer = null;
+    let openCount = 0;
+
+    function placeView3dBtn() {
+        if (!view3dBtn) return;
+        if (!view3dSeat || !view3dSeat.classList.contains('selected')) { view3dBtn.hidden = true; return; }
+        const r = view3dSeat.getBoundingClientRect();
+        const half = view3dBtn.offsetWidth / 2 || 55;
+        view3dBtn.hidden = false;
+        view3dBtn.style.left = `${Math.min(Math.max(r.left + r.width / 2, half + 8), innerWidth - half - 8) + scrollX}px`;
+        view3dBtn.style.top = `${r.top + scrollY}px`;
+    }
+
+    // The 2D map as data for the 3D hall; aisles become wider gaps
+    function readHall() {
+        return [...document.querySelectorAll('.seat-hall .seat-row')].map(row => {
+            let col = 0;
+            const seats = [];
+            for (const el of row.children) {
+                if (el.classList.contains('seat-aisle-gap')) col += 1.5;
+                else if (el.classList.contains('seat-btn')) {
+                    seats.push({ label: el.dataset.seatLabel, col: col++, booked: el.classList.contains('booked'), mine: el.classList.contains('selected') });
+                }
+            }
+            return { label: row.querySelector('.seat-row-label').textContent.trim(), seats };
+        });
+    }
+
+    if (view3dBtn && modal3d) {
+        const stage = document.getElementById('seat3dStage');
+        const loading = document.getElementById('seat3dLoading');
+        const guide = document.getElementById('seat3dGuide');
+        const guideBtn = document.getElementById('seat3dGuideBtn');
+        const caption = document.getElementById('seat3dCaption');
+        const tabs = [...modal3d.querySelectorAll('[data-view]')];
+        const showTab = view => tabs.forEach(t => {
+            t.classList.toggle('active', t.dataset.view === view);
+            t.setAttribute('aria-pressed', t.dataset.view === view);
+        });
+
+        map.addEventListener('scroll', placeView3dBtn, { passive: true });
+        addEventListener('resize', placeView3dBtn);
+        view3dBtn.addEventListener('click', () => bootstrap.Modal.getOrCreateInstance(modal3d).show());
+
+        modal3d.addEventListener('shown.bs.modal', async () => {
+            const id = ++openCount;
+            showTab('seat');
+            caption.textContent = '';
+            loading.textContent = 'Loading 3D view…';
+            loading.hidden = false;
+            try {
+                const { createSeat3D } = await import(modal3d.dataset.module);
+                const v = await createSeat3D(stage, { rows: readHall(), seatLabel: view3dSeat.dataset.seatLabel, title: modal3d.dataset.title });
+                if (id !== openCount) { v.dispose(); return; } // closed while loading
+                viewer = v;
+            } catch (err) {
+                console.error(err);
+                loading.textContent = "Couldn't load the 3D view. Check your connection and try again.";
+                return;
+            }
+            loading.hidden = true;
+            const { seat, info } = viewer;
+            caption.textContent = `Seat ${seat.label} · drag to look around`;
+            stage.setAttribute('aria-label', `3D view from seat ${seat.label}. ${info.verdict}`);
+            guide.replaceChildren(...[
+                `Seat ${seat.label}, row ${info.rowFromScreen} from the screen`,
+                `The screen fills ${info.angle}° of your view. THX suggests about 40° for a cinema.`,
+                info.offAxis > 2 ? `${info.offAxis}° off the centre line` : 'On the centre line',
+                info.verdict,
+                'Drag, or use the arrow keys, to look around.',
+            ].map(text => Object.assign(document.createElement('div'), { textContent: text })));
+            guide.firstChild.className = 'fw-bold';
+        });
+        modal3d.addEventListener('hidden.bs.modal', () => {
+            openCount++;
+            viewer?.dispose();
+            viewer = null;
+            guide.hidden = true;
+            guideBtn.setAttribute('aria-expanded', 'false');
+        });
+
+        tabs.forEach(t => t.addEventListener('click', () => { showTab(t.dataset.view); viewer?.setView(t.dataset.view); }));
+        document.getElementById('seat3dReplay').addEventListener('click', () => { showTab('seat'); viewer?.replay(); });
+        guideBtn.addEventListener('click', () => {
+            guide.hidden = !guide.hidden;
+            guideBtn.setAttribute('aria-expanded', String(!guide.hidden));
+        });
+    }
 
     // How many seats the user wants; picked in the "How many seats?" popup
     let wanted = 2;
@@ -88,6 +184,7 @@ function initSeatSelection() {
                 seat.classList.add('selected');
                 selected.push(seat);
             }
+            view3dSeat = btn;
             updateSummary();
         });
     });
@@ -117,6 +214,7 @@ function initSeatSelection() {
         const ready = count > 0 && count === wanted;
         proceedBtn.disabled = !ready;
         proceedBtn.classList.toggle('opacity-50', !ready);
+        placeView3dBtn();
     }
 }
 
