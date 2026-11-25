@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @Slf4j
 @ControllerAdvice
@@ -21,9 +22,10 @@ public class GlobalExceptionHandler {
         return "error";
     }
 
-    @ExceptionHandler(NoHandlerFoundException.class)
+    // Spring 6.1+ reports unknown URLs as NoResourceFoundException; without it they fell to the 500 handler
+    @ExceptionHandler({NoHandlerFoundException.class, NoResourceFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public String handleNotFound(NoHandlerFoundException ex, Model model) {
+    public String handleNotFound(Exception ex, Model model) {
         model.addAttribute("errorCode", 404);
         model.addAttribute("errorMessage", "Oops! The page or resource you requested does not exist.");
         return "error";

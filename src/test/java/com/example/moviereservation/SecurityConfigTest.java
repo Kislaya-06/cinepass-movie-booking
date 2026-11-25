@@ -82,6 +82,13 @@ class SecurityConfigTest {
     }
 
     @Test
+    @WithUserDetails("rahul.sharma@example.com")
+    void unknownUrlIsNotFound() throws Exception {
+        mockMvc.perform(get("/no-such-page"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     @WithUserDetails("admin@cinepass.com")
     void unknownMovieIdIsNotFound() throws Exception {
         mockMvc.perform(post("/admin/showtimes").with(csrf())
