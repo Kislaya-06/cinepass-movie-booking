@@ -1,0 +1,38 @@
+# Render Blueprint: Dashboard -> New -> Blueprint -> pick this repo.
+# Free web service (sleeps after 15 min idle) + free Postgres (expires after 30 days).
+services:
+  - type: web
+    name: cinepass
+    runtime: docker
+    plan: free
+    region: singapore
+    branch: main
+    healthCheckPath: /actuator/health
+    envVars:
+      # prod = Postgres + Flyway; demo adds the sample cinemas, shows and demo users
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod,demo
+      - key: DB_HOST
+        fromDatabase: { name: cinepass-db, property: host }
+      - key: DB_PORT
+        fromDatabase: { name: cinepass-db, property: port }
+      - key: DB_NAME
+        fromDatabase: { name: cinepass-db, property: database }
+      - key: DB_USERNAME
+        fromDatabase: { name: cinepass-db, property: user }
+      - key: DB_PASSWORD
+        fromDatabase: { name: cinepass-db, property: password }
+      # Secrets: Render asks for these on the first deploy; they never live in git
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: TMDB_API_KEY
+        sync: false
+
+databases:
+  - name: cinepass-db
+    plan: free
+    region: singapore
+    databaseName: cinepass
+    user: cinepass

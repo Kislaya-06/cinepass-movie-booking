@@ -18,7 +18,8 @@ spring:
 app:
   server:
     # Public URL of the site, used in ticket QR codes and emails (no trailing slash)
-    base-url: ${APP_BASE_URL:http://localhost:8080}
+    # Render sets RENDER_EXTERNAL_URL itself; QR codes and emails link here
+    base-url: ${APP_BASE_URL:${RENDER_EXTERNAL_URL:http://localhost:8080}}
   admin:
     email: ${ADMIN_EMAIL:}
     password: ${ADMIN_PASSWORD:}
@@ -112,7 +113,8 @@ spring:
 
   # No defaults on purpose: prod must fail fast if the DB env vars are missing
   datasource:
-    url: ${DB_URL}
+    # Render hands the database over as host/port/name, not a JDBC URL
+    url: ${DB_URL:jdbc:postgresql://${DB_HOST}:${DB_PORT:5432}/${DB_NAME}}
     driverClassName: org.postgresql.Driver
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
@@ -158,3 +160,7 @@ management:
   endpoint:
     health:
       show-details: when-authorized
+  health:
+    # SMTP is optional in prod (mail is async and failures are logged); keep it out of the deploy health check
+    mail:
+      enabled: false
