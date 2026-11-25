@@ -17,6 +17,7 @@ import com.example.moviereservation.repository.ShowtimeRepository;
 import com.example.moviereservation.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +36,9 @@ public class ReservationService {
 
     public static final int MAX_SEATS_PER_BOOKING = 10;
     public static final int MAX_ACTIVE_HOLDS_PER_USER = 2;
+
+    @Value("${app.reservation.expiry-minutes:10}")
+    private int expiryMinutes;
 
     private final ReservationRepository reservationRepository;
     private final ReservationSeatRepository reservationSeatRepository;
@@ -163,6 +167,12 @@ public class ReservationService {
             throw new ApplicationException(
                     String.format("Only PENDING reservations can be confirmed. Current status: %s", reservation.getStatus())
             );
+        }
+
+        // The expiry scheduler only runs every minute, so check the hold window here too
+        if (reservation.getCreatedAt().isBefore(LocalDateTime.now().minusMinutes(expiryMinutes))) {
+            throw new ApplicationException("Your " + expiryMinutes
+                    + "-minute seat hold has expired. Please select your seats again.");
         }
 
         reservation.setStatus(ReservationStatus.CONFIRMED);

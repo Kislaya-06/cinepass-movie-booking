@@ -74,6 +74,18 @@ class ReservationLimitsTest {
     }
 
     @Test
+    void holdOlderThanExpiryWindowCannotBePaid() {
+        Showtime show = upcoming.get(0);
+        Reservation hold = reservationService.createReservation(priya.getId(), show.getId(), freeSeats(show, 1));
+        // Scheduler runs only once a minute, so a stale hold can still be PENDING at payment time
+        hold.setCreatedAt(LocalDateTime.now().minusMinutes(11));
+
+        assertThatThrownBy(() -> reservationService.confirmReservation(hold.getId(), priya.getId()))
+                .isInstanceOf(ApplicationException.class)
+                .hasMessageContaining("expired");
+    }
+
+    @Test
     void userCannotHoldSeatsOnTooManyShowsAtOnce() {
         for (int i = 0; i < ReservationService.MAX_ACTIVE_HOLDS_PER_USER; i++) {
             Showtime show = upcoming.get(i);
