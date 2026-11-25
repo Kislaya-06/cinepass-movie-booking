@@ -142,8 +142,20 @@ public class MovieController {
                         && booked.getOrDefault(st.getId(), 0L) * 2 >= st.getScreen().getSeatCapacity())
                 .map(Showtime::getId)
                 .collect(Collectors.toSet());
+        Set<Long> soldOut = theaters.values().stream().flatMap(List::stream)
+                .filter(st -> st.getScreen().getSeatCapacity() != null
+                        && booked.getOrDefault(st.getId(), 0L) >= st.getScreen().getSeatCapacity())
+                .map(Showtime::getId)
+                .collect(Collectors.toSet());
+        // Hover hint on each time: what every seat tier costs for that show
+        Map<Long, String> priceHints = theaters.values().stream().flatMap(List::stream)
+                .collect(Collectors.toMap(Showtime::getId, st -> java.util.Arrays.stream(com.example.moviereservation.entity.SeatType.values())
+                        .map(t -> t.name() + " ₹" + t.calculatePrice(st.getPrice()).stripTrailingZeros().toPlainString())
+                        .collect(Collectors.joining("  ·  "))));
 
         model.addAttribute("movie", movie);
+        model.addAttribute("soldOut", soldOut);
+        model.addAttribute("priceHints", priceHints);
         model.addAttribute("days", days);
         model.addAttribute("daysWithShows", grouped.keySet());
         model.addAttribute("selectedDate", selected);

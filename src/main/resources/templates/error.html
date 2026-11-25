@@ -17,8 +17,9 @@
                 </p>
             </div>
             <div class="d-flex flex-wrap justify-content-center gap-2">
-                <a th:href="@{/}" class="btn btn-accent px-4">Go to home</a>
-                <a th:href="@{/my-bookings}" class="btn btn-outline-custom px-4">My bookings</a>
+                <a th:href="@{/}" class="btn btn-accent px-4" sec:authorize="!hasRole('ADMIN')">Go to home</a>
+                <a th:href="@{/my-bookings}" class="btn btn-outline-custom px-4" sec:authorize="hasRole('USER')">My bookings</a>
+                <a th:href="@{/admin/dashboard}" class="btn btn-accent px-4" sec:authorize="hasRole('ADMIN')">Go to dashboard</a>
             </div>
         </div>
     </main>

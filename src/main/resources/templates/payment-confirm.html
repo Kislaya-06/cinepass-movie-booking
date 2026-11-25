@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head th:replace="~{fragments/head :: head('Review & Pay - CinePass')}"></head>
-<body class="d-flex flex-column min-vh-100">
+<body class="d-flex flex-column min-vh-100" th:with="focusNav=true">
 
     <!-- Shared Navigation Bar -->
     <div th:replace="~{fragments/navbar :: navbar}"></div>

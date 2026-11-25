@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head th:replace="~{fragments/head :: head('Ticket Verification - CinePass')}"></head>
-<body class="d-flex flex-column min-vh-100 justify-content-between">
+<body class="d-flex flex-column min-vh-100 justify-content-between" th:with="focusNav=true">
 
     <!-- Shared Navigation Bar -->
     <div th:replace="~{fragments/navbar :: navbar}"></div>
@@ -51,7 +51,10 @@
                     <hr>
                     <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
                         <span class="text-body-secondary small" th:text="'Checked ' + ${#temporals.format(verifiedAt, 'dd MMM yyyy, hh:mm a')}">Checked now</span>
-                        <a th:if="${st == 'CONFIRMED'}" th:href="@{'/reservations/' + ${reservation.id} + '/ticket'}" class="btn btn-outline-custom btn-sm">Download ticket (PDF)</a>
+                        <!-- Only the ticket holder or an admin may pull the PDF; door staff just need the status above -->
+                        <th:block sec:authorize="isAuthenticated()">
+                        <a th:if="${st == 'CONFIRMED' and (#authorization.expression('hasRole(''ADMIN'')') or #authentication.principal.id == reservation.user.id)}" th:href="@{'/reservations/' + ${reservation.id} + '/ticket'}" class="btn btn-outline-custom btn-sm">Download ticket (PDF)</a>
+                        </th:block>
                     </div>
                 </div>
             </article>

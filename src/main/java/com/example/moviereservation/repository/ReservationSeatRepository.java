@@ -20,6 +20,10 @@ public interface ReservationSeatRepository extends JpaRepository<ReservationSeat
     );
 
     // Rows of [showtimeId, bookedSeatCount] for the showtimes page "fast filling" hint
+    // How often each seat of a hall was bought, across all its shows (feeds the bestseller marks)
+    @Query("SELECT rs.seat.id, COUNT(rs) FROM ReservationSeat rs WHERE rs.seat.screen.id = :screenId AND rs.reservation.status = :status GROUP BY rs.seat.id")
+    java.util.List<Object[]> countBookingsPerSeat(@Param("screenId") Long screenId, @Param("status") ReservationStatus status);
+
     @Query("SELECT rs.showtime.id, COUNT(rs) FROM ReservationSeat rs WHERE rs.showtime.id IN (:showtimeIds) AND rs.reservation.status IN (:activeStatuses) GROUP BY rs.showtime.id")
     java.util.List<Object[]> countBookedSeatsByShowtime(
             @Param("showtimeIds") Collection<Long> showtimeIds,

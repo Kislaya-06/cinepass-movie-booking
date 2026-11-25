@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head th:replace="~{fragments/head :: head('Select Seats - CinePass')}"></head>
-<body>
+<body th:with="focusNav=true">
 
     <!-- Shared Navigation Bar -->
     <div th:replace="~{fragments/navbar :: navbar}"></div>
@@ -52,16 +52,16 @@
             <div class="seat-row">
                 <span class="seat-row-label" th:text="${rowEntry.key}">A</span>
                 <th:block th:each="seat : ${rowEntry.value}">
-                    <div class="seat-aisle-gap" th:if="${seat.seatNumber == 5 or (rowEntry.value.size() > 10 and seat.seatNumber == 9)}"></div>
+                    <div class="seat-aisle-gap" th:if="${rowEntry.value.size() > 10 ? (seat.seatNumber == 5 or seat.seatNumber == rowEntry.value.size() - 3) : seat.seatNumber == 5}"></div>
                     <button type="button"
                             class="seat-btn"
-                            th:classappend="${seat.status == 'BOOKED' ? 'booked' : ''}"
+                            th:classappend="${seat.status == 'BOOKED' ? 'booked' : (bestsellers.contains(seat.id) ? 'bestseller' : '')}"
                             th:data-seat-id="${seat.id}"
                             th:data-seat-label="${seat.seatRow + seat.seatNumber}"
                             th:data-price="${seat.price.intValue()}"
-                            th:aria-label="${seat.seatRow + seat.seatNumber} + ', ' + ${seat.seatType} + ', ₹' + ${seat.price.intValue()} + (${seat.status == 'BOOKED'} ? ', sold' : '')"
+                            th:aria-label="${seat.seatRow + seat.seatNumber} + ', ' + ${seat.seatType} + ', ₹' + ${seat.price.intValue()} + (${seat.status == 'BOOKED'} ? ', sold' : (${bestsellers.contains(seat.id)} ? ', bestseller' : ''))"
                             th:disabled="${seat.status == 'BOOKED'}">
-                        <span th:text="${seat.seatNumber}">1</span>
+                        <span th:text="${#numbers.formatInteger(seat.seatNumber, 2)}">01</span>
                     </button>
                 </th:block>
             </div>
@@ -75,8 +75,9 @@
 
             <div class="seat-legend mt-3">
                 <div class="legend-item"><div class="legend-box available"></div><span>Available</span></div>
-                <div class="legend-item"><div class="legend-box selected"></div><span>Selected</span></div>
                 <div class="legend-item"><div class="legend-box booked"></div><span>Sold</span></div>
+                <div class="legend-item" title="The seats people book most in this hall"><div class="legend-box bestseller"></div><span>Bestseller</span></div>
+                <div class="legend-item"><div class="legend-box selected"></div><span>Selected</span></div>
             </div>
         </div>
 
@@ -107,7 +108,7 @@
             <div class="modal-content">
                 <div class="modal-body p-4 text-center">
                     <h2 id="seatCountTitle" class="fs-5 mb-3">How many seats?</h2>
-                    <div class="d-flex flex-wrap justify-content-center gap-2 mb-4" role="radiogroup" aria-label="Number of seats">
+                    <div class="d-flex flex-wrap justify-content-center gap-1 mb-4" role="radiogroup" aria-label="Number of seats">
                         <button type="button" th:each="n : ${#numbers.sequence(1, maxSeats)}" class="seat-count-btn"
                                 th:classappend="${n == 2 ? 'active' : ''}" th:data-count="${n}" role="radio"
                                 th:aria-checked="${n == 2}" th:text="${n}">1</button>
@@ -120,6 +121,7 @@
                                  th:text="${free > 0 ? 'Available' : 'Sold out'}">Available</div>
                         </div>
                     </div>
+                    <p class="bestseller-note small mb-0 mt-3" th:unless="${bestsellers.isEmpty()}">Book the <span class="legend-box bestseller d-inline-block align-middle"></span> Bestseller seats in this cinema at no extra cost!</p>
                 </div>
                 <div class="modal-footer border-0 pt-0 px-4 pb-4">
                     <button type="button" class="btn btn-accent w-100 py-2" data-bs-dismiss="modal">Select seats</button>

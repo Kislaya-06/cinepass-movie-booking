@@ -48,6 +48,10 @@ function initSeatSelection() {
 
     if (!selectedCountEl) return;
 
+    // On phones the hall is wider than the screen: start with the centre block in view
+    const map = document.querySelector('.seat-view-container');
+    if (map) map.scrollLeft = (map.scrollWidth - map.clientWidth) / 2;
+
     // How many seats the user wants; picked in the "How many seats?" popup
     let wanted = 2;
     let selected = [];

@@ -19,6 +19,9 @@
   --success: #1c8a3c;
   --success-soft: #e8f5ec;
   --gold: #e09600;
+  --filling: #f5b400;
+  --filling-soft: #fff8e1;
+  --filling-text: #9a6200;
   --text-primary: #1b1b1f;
   --text-secondary: #5c5c66;
   --text-muted: #73737d;
@@ -113,6 +116,15 @@ a:hover {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+}
+.bms-navbar .pill-nav-inner > div:first-child { min-width: 0; }
+.bms-navbar .pill-nav-inner > div:last-child { flex-shrink: 0; }
+@media (max-width: 575.98px) {
+  .bms-navbar .pill-nav-inner { gap: 0.5rem; }
+}
+/* Smallest phones: logo mark only, so the picked area name stays readable */
+@media (max-width: 399.98px) {
+  .bms-navbar .bms-brand > span { display: none; }
 }
 
 .bms-brand {
@@ -214,13 +226,16 @@ a:hover {
 }
 
 .city-selector-nav {
-  flex-shrink: 0;
+  /* gives way first on narrow phones: a long area name ends in "..." instead of widening the page */
+  flex-shrink: 1;
+  min-width: 0;
   display: flex;
   align-items: center;
 }
 
 #navCityBtn {
   display: inline-flex;
+  max-width: 100%;
   align-items: center;
   gap: 0.4rem;
   height: 36px;
@@ -230,6 +245,7 @@ a:hover {
 
 #navCityName {
   display: inline-block;
+  min-width: 0;
   max-width: 130px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -575,12 +591,15 @@ a:hover {
 }
 
 .showtime-pill {
+  position: relative;
   display: inline-flex;
   flex-direction: column;
   align-items: center;
-  min-width: 104px;
-  padding: 0.45rem 0.9rem;
-  border: 1px solid var(--success);
+  justify-content: center;
+  min-width: 120px;
+  min-height: 52px;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
   background: var(--bg-surface);
   color: var(--success);
@@ -595,6 +614,7 @@ a:hover {
 }
 
 .showtime-pill:hover {
+  border-color: var(--success);
   background: var(--success-soft);
   color: var(--success);
 }
@@ -632,7 +652,7 @@ a:hover {
 }
 
 .seat-tier-header {
-  max-width: 560px;
+  max-width: 840px;
   margin: 1.5rem auto 0.75rem;
   padding-bottom: 0.35rem;
   border-bottom: 1px solid var(--border-subtle);
@@ -654,6 +674,16 @@ a:hover {
 .seat-row-label {
   width: 24px;
   flex-shrink: 0;
+  /* stays pinned at the left edge while a wide hall scrolls sideways */
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-main);
+  box-shadow: -1rem 0 0 var(--bg-main), 6px 0 6px -4px rgba(20, 20, 30, 0.12);
   font-size: 0.82rem;
   font-weight: 700;
   color: var(--text-muted);
@@ -685,6 +715,14 @@ a:hover {
 
 .seat-btn:hover:not(.booked):not(.selected) {
   background: var(--success-soft);
+}
+
+.seat-btn.bestseller {
+  border: 1.5px solid var(--filling);
+  color: var(--filling-text);
+}
+.seat-btn.bestseller:hover:not(.selected) {
+  background: var(--filling-soft);
 }
 
 .seat-btn.selected {
@@ -730,6 +768,17 @@ a:hover {
 .legend-box.booked {
   background: var(--bg-surface-hover);
   border-color: var(--border-subtle);
+}
+
+.legend-box.bestseller {
+  border: 1.5px solid var(--filling);
+}
+
+.bestseller-note {
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm);
+  background: var(--filling-soft);
+  color: var(--text-secondary);
 }
 
 .sticky-booking-bar {
@@ -1154,12 +1203,75 @@ a:hover {
   vertical-align: middle;
 }
 .showtime-pill.filling {
-  border-color: var(--gold);
-  color: #a86f00;
+  border-color: var(--filling);
+  color: var(--filling-text);
 }
 .showtime-pill.filling:hover {
-  background: #fff6e0;
-  color: #a86f00;
+  background: var(--filling-soft);
+  color: var(--filling-text);
+}
+.showtime-pill.soldout {
+  border-color: var(--border-subtle);
+  background: var(--bg-surface-elevated);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+.legend-available { background: var(--success); }
+.legend-filling { background: var(--filling); }
+.legend-soldout { background: var(--border-strong); }
+/* Tier prices pop up over a time on hover, like the big ticketing apps */
+.showtime-pill[data-prices]:hover::after,
+.showtime-pill[data-prices]:focus-visible::after {
+  content: attr(data-prices);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  padding: 0.45rem 0.7rem;
+  border-radius: var(--radius-sm);
+  background: var(--text-primary);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+}
+ (hover: none) {
+  .showtime-pill[data-prices]::after { display: none; }
+}
+
+/* Buy tickets: one list, cinema info left, times right */
+.theater-list {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+}
+.theater-row {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem 1.25rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.theater-row:last-child { border-bottom: 0; }
+.theater-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+.theater-perks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+.theater-perks i { margin-right: 0.35rem; }
+@media (min-width: 768px) {
+  .theater-row { flex-direction: row; gap: 2rem; padding: 1.75rem 1.75rem; }
+  .theater-info { flex: 0 0 32%; }
+  .showtime-pills-wrap { flex: 1; align-content: flex-start; gap: 0.85rem; }
 }
 
 /* Seat page */
@@ -1175,6 +1287,7 @@ a:hover {
 }
 .showtime-pill-sm {
   min-width: 88px;
+  min-height: 0;
   padding: 0.3rem 0.7rem;
   font-size: 0.85rem;
 }

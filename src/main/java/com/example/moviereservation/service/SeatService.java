@@ -13,8 +13,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -55,5 +58,34 @@ public class SeatService {
                     );
                 })
                 .toList();
+    }
+
+    /** Share of a hall marked as bestseller on the seat map. */
+    static final double BESTSELLER_SHARE = 0.12;
+
+    public Set<Long> getBestsellerSeatIds(Long screenId, List<SeatResponse> seats) {
+        Map<Long, Long> bookings = reservationSeatRepository.countBookingsPerSeat(screenId, ReservationStatus.CONFIRMED).stream()
+                .collect(Collectors.toMap(r -> (Long) r[0], r -> (Long) r[1]));
+        return pickBestsellers(seats, bookings);
+    }
+
+    /**
+     * The most-bought seats of the hall. Ties (and a hall with no history yet) go to the
+     * sweet spot: the middle of the row, about a third of the way forward from the back row.
+     */
+    static Set<Long> pickBestsellers(List<SeatResponse> seats, Map<Long, Long> bookings) {
+        List<String> rows = seats.stream().map(SeatResponse::seatRow).distinct().sorted().toList();
+        Map<String, Long> rowSize = seats.stream().collect(Collectors.groupingBy(SeatResponse::seatRow, Collectors.counting()));
+        double bestRow = (rows.size() - 1) / 3.0;
+        // Rows weigh 3x so the block comes out wide and shallow, like a real centre block
+        Comparator<SeatResponse> rank = Comparator
+                .comparingLong((SeatResponse s) -> -bookings.getOrDefault(s.id(), 0L))
+                .thenComparingDouble(s -> Math.max(3 * Math.abs(rows.indexOf(s.seatRow()) - bestRow),
+                        Math.abs(s.seatNumber() - (rowSize.get(s.seatRow()) + 1) / 2.0)));
+        return seats.stream()
+                .sorted(rank)
+                .limit(Math.round(seats.size() * BESTSELLER_SHARE))
+                .map(SeatResponse::id)
+                .collect(Collectors.toSet());
     }
 }

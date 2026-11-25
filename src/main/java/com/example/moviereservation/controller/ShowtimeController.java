@@ -56,6 +56,7 @@ public class ShowtimeController {
         model.addAttribute("seats", seats);
         model.addAttribute("seatsByRow", seatsByRow);
         model.addAttribute("seatTiers", byTier);
+        model.addAttribute("bestsellers", seatService.getBestsellerSeatIds(showtime.getScreen().getId(), seats));
         model.addAttribute("sameDayShowtimes", sameDay);
         model.addAttribute("maxSeats", ReservationService.MAX_SEATS_PER_BOOKING);
         model.addAttribute("pageTitle", "Select Seats - " + showtime.getMovie().getTitle());

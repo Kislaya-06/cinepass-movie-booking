@@ -15,8 +15,8 @@
             <nav class="d-flex flex-wrap gap-4" aria-label="Footer">
                 <a th:href="@{/}" sec:authorize="!hasRole('ADMIN')">Movies</a>
                 <a th:href="@{/my-bookings}" sec:authorize="!hasRole('ADMIN')">My bookings</a>
-                <a th:href="@{/login}" sec:authorize="isAnonymous()">Sign in</a>
-                <a th:href="@{/register}" sec:authorize="isAnonymous()">Create account</a>
+                <a th:href="@{/login}" sec:authorize="isAnonymous()" th:unless="${focusNav}">Sign in</a>
+                <a th:href="@{/register}" sec:authorize="isAnonymous()" th:unless="${focusNav}">Create account</a>
             </nav>
         </div>
         <hr class="my-4">

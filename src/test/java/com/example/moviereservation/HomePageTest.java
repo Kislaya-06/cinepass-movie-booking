@@ -32,4 +32,16 @@ class HomePageTest {
         assertThat(nowShowing).isNotEmpty();
         assertThat(Collections.disjoint(nowShowing, comingSoon)).isTrue();
     }
+
+    @Test
+    void cityPickerOnlyOnBrowsingPages() throws Exception {
+        String home = mockMvc.perform(get("/")).andReturn().getResponse().getContentAsString();
+        String login = mockMvc.perform(get("/login")).andReturn().getResponse().getContentAsString();
+        String register = mockMvc.perform(get("/register")).andReturn().getResponse().getContentAsString();
+
+        String signInButton = "btn btn-accent btn-sm px-3 text-nowrap";
+        assertThat(home).contains("id=\"navCityBtn\"", "id=\"mobileSearch\"", signInButton);
+        assertThat(login).doesNotContain("id=\"navCityBtn\"", "id=\"mobileSearch\"", signInButton);
+        assertThat(register).doesNotContain("id=\"navCityBtn\"", "id=\"mobileSearch\"");
+    }
 }

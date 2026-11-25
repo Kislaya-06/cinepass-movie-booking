@@ -59,6 +59,7 @@ public class DataLoader implements CommandLineRunner {
         if (movieRepository.count() > 0) {
             log.info("Database already seeded with records. Checking if additional cities need seeding...");
             seedAdditionalCitiesIfMissing();
+            enlargeSmallHalls();
             topUpShowtimes();
             return;
         }
@@ -342,6 +343,7 @@ public class DataLoader implements CommandLineRunner {
         log.info("Seeded sample reservation with booking reference CP-928410 and 2 seats (C4, C5)");
 
         seedAdditionalCitiesIfMissing();
+        enlargeSmallHalls();
         topUpShowtimes();
         log.info("Dev Data Seeding successfully finished!");
     }
@@ -357,6 +359,38 @@ public class DataLoader implements CommandLineRunner {
         createTheaterWithScreen("PVR: Forum Mall, Koramangala", "Hosur Road, Koramangala", "Bengaluru", 1);
         createTheaterWithScreen("Cinepolis: Nexus Shantiniketan", "Whitefield Main Road", "Bengaluru", 3);
         createTheaterWithScreen("AMB Cinemas: Gachibowli", "Sarath City Capital Mall, Gachibowli", "Hyderabad", 1);
+    }
+
+    public static final int HALL_ROWS = 12;
+    public static final int HALL_SEATS_PER_ROW = 20;
+
+    /** Grows halls seeded by older versions (4 x 10) to multiplex size; existing seats and bookings stay. */
+    void enlargeSmallHalls() {
+        for (Screen screen : screenRepository.findAll()) {
+            if (screen.getSeatCapacity() >= HALL_ROWS * HALL_SEATS_PER_ROW) {
+                continue;
+            }
+            List<Seat> existing = seatRepository.findByScreenIdOrderBySeatRowAscSeatNumberAsc(screen.getId());
+            java.util.Map<String, SeatType> rowType = existing.stream()
+                    .collect(java.util.stream.Collectors.toMap(Seat::getSeatRow, Seat::getSeatType, (a, b) -> a));
+            java.util.Set<String> taken = existing.stream()
+                    .map(s -> s.getSeatRow() + "-" + s.getSeatNumber())
+                    .collect(java.util.stream.Collectors.toSet());
+            List<Seat> added = new ArrayList<>();
+            for (int r = 0; r < HALL_ROWS; r++) {
+                String row = String.valueOf((char) ('A' + r));
+                SeatType type = rowType.getOrDefault(row, SeatType.REGULAR);
+                for (int n = 1; n <= HALL_SEATS_PER_ROW; n++) {
+                    if (!taken.contains(row + "-" + n)) {
+                        added.add(Seat.builder().seatRow(row).seatNumber(n).seatType(type).screen(screen).build());
+                    }
+                }
+            }
+            seatRepository.saveAll(added);
+            screen.setSeatCapacity(existing.size() + added.size());
+            screenRepository.save(screen);
+            log.info("Enlarged screen {} to {} seats", screen.getId(), screen.getSeatCapacity());
+        }
     }
 
     // Real cinema-style slots; later shows cost more
@@ -418,7 +452,7 @@ public class DataLoader implements CommandLineRunner {
                 .location(location)
                 .city(city)
                 .build());
-        // 4 rows x 10: A recliner, B premium, C-D regular
-        return screenService.createScreen(theater.getId(), screenNum, 4, 10, 1, 1);
+        // Multiplex size: 2 recliner rows at the back, 4 premium, 6 regular nearest the screen
+        return screenService.createScreen(theater.getId(), screenNum, HALL_ROWS, HALL_SEATS_PER_ROW, 2, 4);
     }
 }

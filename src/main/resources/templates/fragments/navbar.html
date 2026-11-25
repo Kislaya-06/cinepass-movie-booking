@@ -4,7 +4,7 @@
 <nav class="bms-navbar">
     <div class="pill-nav-inner">
         <!-- Brand Logo -->
-        <div class="d-flex align-items-center gap-3">
+        <div class="d-flex align-items-center gap-2 gap-sm-3">
             <a th:href="@{/}" sec:authorize="!hasRole('ADMIN')" class="bms-brand">
                 <div class="logo-icon">
                     <i class="fa-solid fa-ticket-simple"></i>
@@ -17,7 +17,8 @@
             </a>
             
             <!-- City Selector Badge (Triggers City Modal) -->
-            <div class="city-selector-nav flex-shrink-0" sec:authorize="!hasRole('ADMIN')">
+            <!-- focusNav (sign-in, checkout, ticket check): only the brand and account menu, nothing to wander off to -->
+            <div class="city-selector-nav" sec:authorize="!hasRole('ADMIN')" th:unless="${focusNav}">
                 <button class="btn btn-sm btn-outline-custom text-nowrap d-inline-flex align-items-center gap-2" type="button" data-bs-toggle="modal" data-bs-target="#citySelectModal" id="navCityBtn">
                     <i class="fa-solid fa-location-dot text-accent"></i>
                     <span id="navCityName" class="fw-semibold text-nowrap">Mumbai</span>
@@ -27,7 +28,7 @@
         </div>
 
         <!-- Search Bar -->
-        <div class="bms-search-box d-none d-lg-block" sec:authorize="!hasRole('ADMIN')">
+        <div class="bms-search-box d-none d-lg-block" sec:authorize="!hasRole('ADMIN')" th:unless="${focusNav}">
             <form th:action="@{/}" method="get" class="d-flex align-items-center w-100 m-0">
                 <i class="fa-solid fa-magnifying-glass bms-search-icon"></i>
                 <input type="text" name="search" class="bms-search-input" placeholder="Search for Movies, Theaters, Genres...">
@@ -36,15 +37,22 @@
 
         <!-- Nav Links & Auth Button -->
         <div class="d-flex align-items-center gap-2">
+            <!-- Phones have no room for the search bar: an icon opens it below the header -->
+            <button type="button" class="bms-nav-link d-lg-none border-0 bg-transparent" sec:authorize="!hasRole('ADMIN')" th:unless="${focusNav}"
+                    data-bs-toggle="collapse" data-bs-target="#mobileSearch" aria-expanded="false" aria-controls="mobileSearch" aria-label="Search movies">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
+            <th:block th:unless="${focusNav}">
             <a th:href="@{/}" sec:authorize="!hasRole('ADMIN')" class="bms-nav-link d-none d-sm-flex">
                 <i class="fa-solid fa-film"></i> Movies
             </a>
             <a sec:authorize="hasRole('USER')" th:href="@{/my-bookings}" class="bms-nav-link d-none d-lg-flex">
                 <i class="fa-solid fa-receipt"></i> My Bookings
             </a>
+            </th:block>
 
             <!-- Anonymous: Sign In Button -->
-            <div sec:authorize="isAnonymous()" class="ms-2">
+            <div sec:authorize="isAnonymous()" class="ms-2" th:unless="${focusNav}">
                 <a th:href="@{/login}" class="btn btn-accent btn-sm px-3 text-nowrap">
                     <i class="fa-solid fa-arrow-right-to-bracket d-none d-sm-inline"></i> Sign In
                 </a>
@@ -72,6 +80,12 @@
                 </div>
             </div>
         </div>
+    </div>
+    <div class="collapse d-lg-none border-top px-3 py-2" id="mobileSearch" sec:authorize="!hasRole('ADMIN')" th:unless="${focusNav}">
+        <form th:action="@{/}" method="get" class="bms-search-box d-flex align-items-center m-0" role="search">
+            <i class="fa-solid fa-magnifying-glass bms-search-icon" aria-hidden="true"></i>
+            <input type="search" name="search" class="bms-search-input" placeholder="Search for movies" aria-label="Search for movies">
+        </form>
     </div>
 
     <!-- Global Flash Notification Toast Container -->

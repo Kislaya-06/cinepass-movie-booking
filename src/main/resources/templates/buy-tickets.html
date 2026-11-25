@@ -48,8 +48,9 @@
                         <button type="button" class="filter-pill" data-slot="night">Night</button>
                     </div>
                     <div class="d-flex gap-3 small text-body-secondary">
-                        <span><span class="legend-dot bg-success"></span>Available</span>
-                        <span><span class="legend-dot" style="background: var(--gold);"></span>Fast filling</span>
+                        <span><span class="legend-dot legend-available"></span>Available</span>
+                        <span><span class="legend-dot legend-filling"></span>Fast filling</span>
+                        <span><span class="legend-dot legend-soldout"></span>Sold out</span>
                     </div>
                 </div>
             </div>
@@ -64,19 +65,32 @@
 
             <p class="small text-body-secondary mb-3" th:unless="${theaters.isEmpty()}" th:text="'Cinemas in ' + ${selectedCity} + (${selectedArea != null and !selectedArea.isBlank()} ? ', nearest to ' + ${selectedArea} + ' first' : '')">Cinemas in Delhi-NCR</p>
 
-            <div th:each="theaterEntry : ${theaters}" class="theater-card theater-row">
-                <div class="theater-header">
-                    <div>
-                        <h2 class="fs-6 fw-bold mb-1" th:text="${theaterEntry.key}">Theater name</h2>
-                        <div class="text-body-secondary small" th:text="${theaterEntry.value[0].screen.theater.location}">Location</div>
+            <div class="theater-list" th:unless="${theaters.isEmpty()}">
+                <div th:each="theaterEntry : ${theaters}" class="theater-row">
+                    <div class="theater-info">
+                        <h2 class="theater-name" th:text="${theaterEntry.key}">Theater name</h2>
+                        <div class="text-body-secondary small mb-2" th:text="${theaterEntry.value[0].screen.theater.location}">Location</div>
+                        <div class="theater-perks">
+                            <span><i class="fa-solid fa-mobile-screen" aria-hidden="true"></i>M-Ticket</span>
+                            <span class="text-success"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i>Cancellation available</span>
+                        </div>
                     </div>
-                </div>
-                <div class="showtime-pills-wrap">
-                    <a th:each="st : ${theaterEntry.value}" th:href="@{'/showtimes/' + ${st.id} + '/seats'}"
-                       class="showtime-pill" th:classappend="${fastFilling.contains(st.id) ? 'filling' : ''}"
-                       th:data-hour="${st.startTime.hour}"
-                       th:title="'Screen ' + ${st.screen.screenNumber} + (${fastFilling.contains(st.id)} ? ' · Fast filling' : '')"
-                       th:text="${#temporals.format(st.startTime, 'hh:mm a')}">10:15 AM</a>
+                    <div class="showtime-pills-wrap">
+                        <th:block th:each="st : ${theaterEntry.value}">
+                            <span th:if="${soldOut.contains(st.id)}" class="showtime-pill soldout" aria-disabled="true"
+                                  th:data-hour="${st.startTime.hour}" title="Sold out">
+                                <span th:text="${#temporals.format(st.startTime, 'hh:mm a')}">10:15 AM</span>
+                                <span class="format-sub">Sold out</span>
+                            </span>
+                            <a th:unless="${soldOut.contains(st.id)}" th:href="@{'/showtimes/' + ${st.id} + '/seats'}"
+                               class="showtime-pill" th:classappend="${fastFilling.contains(st.id) ? 'filling' : ''}"
+                               th:data-hour="${st.startTime.hour}" th:data-prices="${priceHints[st.id]}"
+                               th:aria-label="${#temporals.format(st.startTime, 'hh:mm a')} + ', Screen ' + ${st.screen.screenNumber} + (${fastFilling.contains(st.id)} ? ', fast filling' : '') + '. ' + ${priceHints[st.id]}">
+                                <span th:text="${#temporals.format(st.startTime, 'hh:mm a')}">10:15 AM</span>
+                                <span class="format-sub" th:text="'SCREEN ' + ${st.screen.screenNumber}">SCREEN 1</span>
+                            </a>
+                        </th:block>
+                    </div>
                 </div>
             </div>
             <p id="noSlotShows" class="text-body-secondary text-center py-4 d-none">No shows at this time of day. Try another filter.</p>
