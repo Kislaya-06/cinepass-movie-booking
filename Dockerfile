@@ -1,14 +1,14 @@
 # --- Build stage: compile and package the Spring Boot jar ---
-FROM eclipse-temurin:17-jdk AS build
+# Maven comes preinstalled: the wrapper's own Maven download failed on Render's builders
+FROM maven:3.9.9-eclipse-temurin-17 AS build
 WORKDIR /app
 
 # Download dependencies first so code changes don't re-download them
-COPY .mvn/ .mvn/
-COPY mvnw pom.xml ./
-RUN chmod +x mvnw && ./mvnw -B -q dependency:go-offline
+COPY pom.xml ./
+RUN mvn -B -q dependency:go-offline
 
 COPY src/ src/
-RUN ./mvnw -B -q package -DskipTests
+RUN mvn -B -q package -DskipTests
 
 # --- Run stage: small JRE image, non-root user ---
 FROM eclipse-temurin:17-jre
