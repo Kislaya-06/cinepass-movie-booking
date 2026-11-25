@@ -307,12 +307,12 @@ public class DataLoader implements CommandLineRunner {
         ));
         log.info("Seeded 7 showtimes in future relative to now");
 
-        // 7. Seed Sample Confirmed Reservation (matching UI view: BMS-928410 for seats C4, C5)
+        // 7. Seed Sample Confirmed Reservation (matching UI view: CP-928410 for seats C4, C5)
         Seat seatC4 = seatRepository.findByScreenIdAndSeatRowAndSeatNumber(pvrScreen1.getId(), "C", 4).orElseThrow();
         Seat seatC5 = seatRepository.findByScreenIdAndSeatRowAndSeatNumber(pvrScreen1.getId(), "C", 5).orElseThrow();
 
         Reservation sampleReservation = Reservation.builder()
-                .bookingReference("BMS-928410")
+                .bookingReference("CP-928410")
                 .status(ReservationStatus.CONFIRMED)
                 .seatSummary("C4, C5")
                 .totalAmount(new BigDecimal("560.00"))
@@ -338,7 +338,7 @@ public class DataLoader implements CommandLineRunner {
                 .build();
 
         reservationSeatRepository.saveAll(List.of(rs1, rs2));
-        log.info("Seeded sample reservation with booking reference BMS-928410 and 2 seats (C4, C5)");
+        log.info("Seeded sample reservation with booking reference CP-928410 and 2 seats (C4, C5)");
 
         seedAdditionalCitiesIfMissing();
         log.info("Dev Data Seeding successfully finished!");

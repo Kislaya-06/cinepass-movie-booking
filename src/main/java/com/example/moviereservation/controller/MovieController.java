@@ -44,12 +44,9 @@ public class MovieController {
                 .filter(m -> m.getReleaseDate() != null && m.getReleaseDate().isAfter(now))
                 .toList();
 
-        if (comingSoon.isEmpty()) {
-            comingSoon = movies;
-        }
-
+        // No fallbacks: filling an empty list with all movies showed the same films in both rows
         model.addAttribute("featuredMovie", movies.isEmpty() ? null : movies.get(0));
-        model.addAttribute("nowShowing", nowShowing.isEmpty() ? movies : nowShowing);
+        model.addAttribute("nowShowing", nowShowing);
         model.addAttribute("comingSoon", comingSoon);
         model.addAttribute("activeGenre", genre != null ? genre : "all");
         model.addAttribute("pageTitle", "CinePass - Book Movie Tickets Online");

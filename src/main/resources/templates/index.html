@@ -64,9 +64,10 @@
                     </div>
                 </div>
 
-                <div class="movie-scroll-wrapper">
+                <p th:if="${nowShowing.isEmpty()}" class="text-secondary-subtle">No movies showing right now. Try another genre or search.</p>
+                <div class="movie-scroll-wrapper" th:unless="${nowShowing.isEmpty()}">
                     <div class="movie-scroll-row">
-                        
+
                         <!-- Dynamic Movie Card -->
                         <div class="movie-card" th:each="movie : ${nowShowing}">
                             <a th:href="@{'/movies/' + ${movie.id}}">

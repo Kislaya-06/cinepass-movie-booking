@@ -35,12 +35,12 @@ class TicketQrUrlTest {
         };
         ReflectionTestUtils.setField(ticketPdfService, "qrCodeService", capturing);
         try {
-            var reservation = reservationRepository.findByBookingReference("BMS-928410").orElseThrow();
+            var reservation = reservationRepository.findByBookingReference("CP-928410").orElseThrow();
             ticketPdfService.generateTicketPdf(reservation);
         } finally {
             ReflectionTestUtils.setField(ticketPdfService, "qrCodeService", new QrCodeService());
         }
 
-        assertThat(encoded).containsExactly("https://cinepass.example.com/verify/BMS-928410");
+        assertThat(encoded).containsExactly("https://cinepass.example.com/verify/CP-928410");
     }
 }

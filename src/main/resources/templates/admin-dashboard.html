@@ -177,7 +177,8 @@
                             <span class="badge bg-info-subtle text-info border border-info">Popularity</span>
                         </div>
                         <div style="height: 200px; position: relative;">
-                            <canvas id="popularMoviesChart"></canvas>
+                            <canvas id="popularMoviesChart" th:if="${chartMovieTitlesJson != '[]'}"></canvas>
+                            <p th:unless="${chartMovieTitlesJson != '[]'}" class="text-secondary-subtle small text-center pt-5">No bookings yet, so no popular movies to show.</p>
                         </div>
                     </div>
                 </div>
@@ -227,7 +228,7 @@
                                 <td colspan="8" class="text-center py-4 text-secondary-subtle">No reservations matching filter.</td>
                             </tr>
                             <tr th:each="res : ${reservations}">
-                                <td class="fw-bold text-white fw-mono" th:text="'#' + ${res.bookingReference}">#BMS-928410</td>
+                                <td class="fw-bold text-white fw-mono" th:text="'#' + ${res.bookingReference}">#CP-928410</td>
                                 <td>
                                     <div class="text-white fw-semibold" th:text="${res.user.name}">Rahul Sharma</div>
                                     <div class="text-secondary-subtle small" style="font-size: 0.75rem;" th:text="${res.user.email}">user@example.com</div>

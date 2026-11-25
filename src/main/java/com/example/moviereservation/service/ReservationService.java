@@ -229,6 +229,6 @@ public class ReservationService {
     }
 
     private String generateBookingReference() {
-        return "BMS-" + UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase();
+        return "CP-" + UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase();
     }
 }

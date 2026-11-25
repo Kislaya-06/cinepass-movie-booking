@@ -27,8 +27,8 @@ class MovieDeletionTest {
 
     @Test
     void movieWithBookingsCannotBeDeletedAndBookingsSurvive() {
-        // Seeded sample booking BMS-928410 is for Dune
-        Movie dune = reservationRepository.findByBookingReference("BMS-928410").orElseThrow().getShowtime().getMovie();
+        // Seeded sample booking CP-928410 is for Dune
+        Movie dune = reservationRepository.findByBookingReference("CP-928410").orElseThrow().getShowtime().getMovie();
         long bookingsBefore = reservationRepository.count();
 
         assertThatThrownBy(() -> movieService.deleteMovie(dune.getId()))

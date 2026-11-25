@@ -1,5 +1,5 @@
 // ==========================================================================
-// BookMyShow Interactive Client Logic
+// CinePass Interactive Client Logic
 // ==========================================================================
 
 document.addEventListener('DOMContentLoaded', () => {

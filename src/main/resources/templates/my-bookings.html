@@ -58,7 +58,7 @@
                                 <i class="fa-solid fa-hourglass-end me-1"></i> EXPIRED
                             </span>
 
-                            <span class="text-muted small">Booking Ref: <strong class="text-white fw-mono" th:text="'#' + ${booking.bookingReference}">#BMS-928410</strong></span>
+                            <span class="text-muted small">Booking Ref: <strong class="text-white fw-mono" th:text="'#' + ${booking.bookingReference}">#CP-928410</strong></span>
                         </div>
                         <span class="text-secondary-subtle small" th:text="'Booked: ' + ${#temporals.format(booking.createdAt, 'MMM dd, yyyy - hh:mm a')}">Booked on Sep 14, 2026</span>
                     </div>
@@ -129,7 +129,7 @@
                             <i class="fa-solid fa-qrcode text-dark" style="display: block; font-size: 3.5rem;"></i>
                         </div>
                         <div class="small fw-bold text-white" style="font-size: 0.75rem;">VERIFY PASS</div>
-                        <div class="text-accent fw-mono small" th:text="${booking.bookingReference}">BMS-928410</div>
+                        <div class="text-accent fw-mono small" th:text="${booking.bookingReference}">CP-928410</div>
                     </a>
                 </div>
 

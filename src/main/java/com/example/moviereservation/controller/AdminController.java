@@ -118,10 +118,6 @@ public class AdminController {
             movieTitles.add((String) row[0]);
             movieCounts.add((Long) row[1]);
         }
-        if (movieTitles.isEmpty()) {
-            movieTitles.add("Dune: Part Two");
-            movieCounts.add(0L);
-        }
 
         List<Movie> movies = movieRepository.findAll();
         List<Theater> theaters = theaterRepository.findAll();

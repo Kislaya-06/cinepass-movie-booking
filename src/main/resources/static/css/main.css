@@ -1,5 +1,5 @@
 /* ==========================================================================
-   BookMyShow Dark Theme - Movie Reservation System
+   CinePass Dark Theme - Movie Reservation System
    Palette:
      Canvas: #0b0b0f
      Card Dark: #14141e
@@ -1064,7 +1064,7 @@ a:hover {
 }
 
 /* ==========================================================================
-   BookMyShow Style City Selector Modal & Navbar Badge
+   City Selector Modal & Navbar Badge
    ========================================================================== */
 .city-selector-nav {
   flex-shrink: 0;
