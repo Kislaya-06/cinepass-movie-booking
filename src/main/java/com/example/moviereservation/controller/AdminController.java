@@ -12,6 +12,8 @@ import com.example.moviereservation.repository.ScreenRepository;
 import com.example.moviereservation.repository.ShowtimeRepository;
 import com.example.moviereservation.repository.TheaterRepository;
 import com.example.moviereservation.exception.ApplicationException;
+import com.example.moviereservation.exception.ResourceNotFoundException;
+import com.example.moviereservation.service.MovieService;
 import com.example.moviereservation.service.ScreenService;
 import com.example.moviereservation.service.TmdbMovieSyncService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -50,6 +52,7 @@ public class AdminController {
     private final ObjectMapper objectMapper;
     private final TmdbMovieSyncService tmdbMovieSyncService;
     private final ScreenService screenService;
+    private final MovieService movieService;
 
     @GetMapping({"", "/", "/dashboard"})
     public String dashboard(
@@ -197,8 +200,12 @@ public class AdminController {
 
     @PostMapping("/movies/{id}/delete")
     public String deleteMovie(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        movieRepository.deleteById(id);
-        redirectAttributes.addFlashAttribute("successMessage", "Movie deleted successfully.");
+        try {
+            movieService.deleteMovie(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Movie deleted successfully.");
+        } catch (ApplicationException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        }
         return "redirect:/admin/dashboard#movies";
     }
 
@@ -247,8 +254,9 @@ public class AdminController {
             @RequestParam("price") BigDecimal price,
             RedirectAttributes redirectAttributes
     ) {
-        Movie movie = movieRepository.findById(movieId).orElseThrow();
-        Screen screen = screenRepository.findById(screenId).orElseThrow();
+        Movie movie = movieService.getMovieById(movieId);
+        Screen screen = screenRepository.findById(screenId)
+                .orElseThrow(() -> new ResourceNotFoundException("Screen not found with ID: " + screenId));
 
         Showtime showtime = Showtime.builder()
                 .movie(movie)

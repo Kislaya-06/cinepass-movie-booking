@@ -50,7 +50,8 @@ public class Showtime extends BaseEntity {
     @JoinColumn(name = "screen_id", nullable = false)
     private Screen screen;
 
-    @OneToMany(mappedBy = "showtime", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    // No cascade: removing a showtime must never silently delete customers' bookings (the FK blocks it instead)
+    @OneToMany(mappedBy = "showtime", fetch = FetchType.LAZY)
     @Builder.Default
     private List<Reservation> reservations = new ArrayList<>();
 

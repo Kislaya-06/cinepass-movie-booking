@@ -57,14 +57,25 @@ class SecurityConfigTest {
     @Test
     @WithUserDetails("admin@cinepass.com") // real CustomUserDetails, the navbar reads principal.name
     void unexpectedErrorsDoNotLeakRawMessage() throws Exception {
-        // Unknown movie id -> Optional.orElseThrow() -> NoSuchElementException("No value present")
+        // Non-numeric id -> MethodArgumentTypeMismatchException, whose message names Java types
         mockMvc.perform(post("/admin/showtimes").with(csrf())
-                        .param("movieId", "999999")
-                        .param("screenId", "999999")
+                        .param("movieId", "abc")
+                        .param("screenId", "1")
                         .param("startTime", "2030-01-01T18:00:00")
                         .param("price", "200"))
                 .andExpect(status().isInternalServerError())
-                .andExpect(content().string(not(containsString("No value present"))));
+                .andExpect(content().string(not(containsString("java.lang"))));
+    }
+
+    @Test
+    @WithUserDetails("admin@cinepass.com")
+    void unknownMovieIdIsNotFound() throws Exception {
+        mockMvc.perform(post("/admin/showtimes").with(csrf())
+                        .param("movieId", "999999")
+                        .param("screenId", "1")
+                        .param("startTime", "2030-01-01T18:00:00")
+                        .param("price", "200"))
+                .andExpect(status().isNotFound());
     }
 
     @Test

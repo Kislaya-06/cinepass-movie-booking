@@ -2,8 +2,10 @@ package com.example.moviereservation.service;
 
 import com.example.moviereservation.entity.Movie;
 import com.example.moviereservation.entity.Showtime;
+import com.example.moviereservation.exception.ApplicationException;
 import com.example.moviereservation.exception.ResourceNotFoundException;
 import com.example.moviereservation.repository.MovieRepository;
+import com.example.moviereservation.repository.ReservationRepository;
 import com.example.moviereservation.repository.ShowtimeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,7 @@ public class MovieService {
 
     private final MovieRepository movieRepository;
     private final ShowtimeRepository showtimeRepository;
+    private final ReservationRepository reservationRepository;
 
     public List<Movie> getAllMovies() {
         return movieRepository.findAll();
@@ -31,6 +34,18 @@ public class MovieService {
     public Movie getMovieById(Long id) {
         return movieRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Movie not found with ID: " + id));
+    }
+
+    /** Deletes a movie and its showtimes, but only if nobody ever booked it (booking history is kept). */
+    @Transactional
+    public void deleteMovie(Long id) {
+        Movie movie = getMovieById(id);
+        long bookings = reservationRepository.countByShowtime_Movie_Id(id);
+        if (bookings > 0) {
+            throw new ApplicationException("'" + movie.getTitle() + "' has " + bookings
+                    + " booking(s) and can't be deleted. Stop scheduling new shows for it instead.");
+        }
+        movieRepository.delete(movie); // cascades to its (booking-free) showtimes
     }
 
     public List<Movie> searchMoviesByTitle(String query) {

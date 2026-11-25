@@ -26,6 +26,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     long countByStatus(ReservationStatus status);
 
+    long countByShowtime_Movie_Id(Long movieId);
+
     List<Reservation> findByCreatedAtAfter(java.time.LocalDateTime cutoff);
 
     @org.springframework.data.jpa.repository.Query("SELECT r.showtime.movie.title, COUNT(r) FROM Reservation r WHERE r.status = com.example.moviereservation.entity.ReservationStatus.CONFIRMED GROUP BY r.showtime.movie.title ORDER BY COUNT(r) DESC")
