@@ -33,6 +33,9 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ReservationService {
 
+    public static final int MAX_SEATS_PER_BOOKING = 10;
+    public static final int MAX_ACTIVE_HOLDS_PER_USER = 2;
+
     private final ReservationRepository reservationRepository;
     private final ReservationSeatRepository reservationSeatRepository;
     private final ShowtimeRepository showtimeRepository;
@@ -57,6 +60,25 @@ public class ReservationService {
         List<Long> uniqueSeatIds = (seatIds != null) ? seatIds.stream().distinct().toList() : List.of();
         if (uniqueSeatIds.isEmpty()) {
             throw new ApplicationException("Please select at least one seat to proceed.");
+        }
+        // The seat map enforces this too, but only the server can stop a hand-crafted request
+        if (uniqueSeatIds.size() > MAX_SEATS_PER_BOOKING) {
+            throw new ApplicationException("You can book at most " + MAX_SEATS_PER_BOOKING + " seats at a time.");
+        }
+
+        // Re-selecting seats for the same show replaces the user's previous unpaid hold
+        reservationRepository.findByUserIdAndShowtimeIdAndStatus(userId, showtimeId, ReservationStatus.PENDING)
+                .forEach(old -> {
+                    old.setStatus(ReservationStatus.CANCELLED);
+                    old.getReservationSeats().clear();
+                    // flush now: Hibernate runs inserts before deletes, so re-picking a released seat would hit uk_showtime_seat
+                    reservationRepository.saveAndFlush(old);
+                });
+
+        // shortcut: no cooldown after a hold expires, add one if users start cycling holds
+        if (reservationRepository.countByUserIdAndStatus(userId, ReservationStatus.PENDING) >= MAX_ACTIVE_HOLDS_PER_USER) {
+            throw new ApplicationException("You already have " + MAX_ACTIVE_HOLDS_PER_USER
+                    + " pending bookings. Pay for or cancel one in My Bookings first.");
         }
 
         List<Seat> seats = seatRepository.findAllById(uniqueSeatIds);
