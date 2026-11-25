@@ -6,6 +6,11 @@ spring:
   # dev/test build the schema with ddl-auto; only prod runs migrations
   flyway:
     enabled: false
+  # Render the whole page before sending it. Streaming flushed the big navbar first, so the
+  # login/register form could no longer create the session its CSRF token needs (page cut off).
+  thymeleaf:
+    servlet:
+      produce-partial-output-while-processing: false
 
 app:
   server:
