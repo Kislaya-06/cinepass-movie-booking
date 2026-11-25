@@ -40,4 +40,19 @@ class DemoSeedingTest {
 
         assertThat(showtimeRepository.existsByStartTimeBetween(now, now.plusHours(24))).isTrue();
     }
+
+    @Test
+    @Transactional
+    void seededDaysUseCinemaSlotsAndOnlyReleasedMovies() {
+        java.time.LocalDate day = java.time.LocalDate.now().plusDays(DataLoader.DAYS_AHEAD - 1);
+        var shows = showtimeRepository.findAll().stream()
+                .filter(s -> s.getStartTime().toLocalDate().equals(day))
+                .toList();
+
+        assertThat(shows).isNotEmpty();
+        assertThat(shows).allSatisfy(s -> {
+            assertThat(java.util.List.of(DataLoader.SLOTS)).contains(s.getStartTime().toLocalTime());
+            assertThat(s.getMovie().getReleaseDate() == null || !s.getMovie().getReleaseDate().isAfter(day)).isTrue();
+        });
+    }
 }

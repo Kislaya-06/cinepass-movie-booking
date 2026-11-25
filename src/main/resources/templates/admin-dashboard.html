@@ -11,7 +11,7 @@
         <aside class="admin-sidebar">
             <div class="d-flex align-items-center gap-2 mb-4 px-2">
                 <i class="fa-solid fa-gauge-high text-accent fs-5"></i>
-                <h5 class="fw-bold text-white mb-0">Admin Console</h5>
+                <h5 class="fw-bold text-body mb-0">Admin Console</h5>
             </div>
 
             <nav class="d-flex flex-column gap-1">
@@ -34,20 +34,17 @@
                 <a href="/actuator/health" target="_blank" class="admin-nav-item">
                     <i class="fa-solid fa-heart-pulse text-success"></i> Health / Actuator
                 </a>
-                <a th:href="@{/}" class="admin-nav-item">
-                    <i class="fa-solid fa-arrow-left"></i> Back to User Site
-                </a>
             </nav>
         </aside>
 
         <!-- Admin Main Content Area -->
         <main class="admin-main">
             <!-- Flash Message Banners -->
-            <div th:if="${successMessage}" class="alert alert-success d-flex align-items-center gap-2 py-2 px-3 small rounded-3 mb-4" style="background: rgba(46, 213, 115, 0.15); color: #2ed573; border: 1px solid rgba(46, 213, 115, 0.3);">
+            <div th:if="${successMessage}" class="alert alert-success d-flex align-items-center gap-2 py-2 px-3 small rounded-3 mb-4">
                 <i class="fa-solid fa-circle-check"></i>
                 <span th:text="${successMessage}">Action executed successfully.</span>
             </div>
-            <div th:if="${errorMessage}" class="alert alert-danger d-flex align-items-center gap-2 py-2 px-3 small rounded-3 mb-4" style="background: rgba(255, 71, 87, 0.15); color: #ff4757; border: 1px solid rgba(255, 71, 87, 0.3);">
+            <div th:if="${errorMessage}" class="alert alert-danger d-flex align-items-center gap-2 py-2 px-3 small rounded-3 mb-4">
                 <i class="fa-solid fa-triangle-exclamation"></i>
                 <span th:text="${errorMessage}">Error occurred.</span>
             </div>
@@ -55,12 +52,12 @@
             <!-- Top Header -->
             <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
                 <div>
-                    <h3 class="fw-bold text-white mb-1">System Overview & Management</h3>
-                    <p class="text-secondary-subtle small mb-0">Real-time cinema performance and reservations tracking</p>
+                    <h1 class="fs-4 mb-1">Dashboard</h1>
+                    <p class="text-body-secondary small mb-0">Bookings, revenue and shows at a glance</p>
                 </div>
                 <div class="d-flex flex-wrap gap-2">
-                    <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#syncTmdbModal">
-                        <i class="fa-solid fa-cloud-arrow-down me-1"></i> Sync TMDb
+                    <button class="btn btn-sm btn-outline-custom" data-bs-toggle="modal" data-bs-target="#syncTmdbModal">
+                        Sync TMDb
                     </button>
                     <button class="btn btn-sm btn-accent" data-bs-toggle="modal" data-bs-target="#addMovieModal">
                         <i class="fa-solid fa-plus me-1"></i> Add Movie
@@ -82,11 +79,11 @@
                 <div class="col-xl-3 col-sm-6">
                     <div class="stat-card">
                         <div>
-                            <div class="text-secondary-subtle small fw-medium">Confirmed Revenue</div>
-                            <div class="fs-4 fw-bold text-white my-1" th:text="'₹' + ${totalRevenue}">₹0</div>
-                            <div class="small text-success"><i class="fa-solid fa-coins me-1"></i> Live H2 Database</div>
+                            <div class="text-body-secondary small fw-medium">Confirmed Revenue</div>
+                            <div class="fs-4 fw-bold text-body my-1" th:text="'₹' + ${#numbers.formatDecimal(totalRevenue, 1, 'COMMA', 2, 'POINT')}">₹0</div>
+                            <div class="small text-body-secondary">Confirmed bookings only</div>
                         </div>
-                        <div class="stat-icon" style="background: rgba(34, 197, 94, 0.15); color: #4ade80;">
+                        <div class="stat-icon">
                             <i class="fa-solid fa-indian-rupee-sign"></i>
                         </div>
                     </div>
@@ -95,11 +92,11 @@
                 <div class="col-xl-3 col-sm-6">
                     <div class="stat-card">
                         <div>
-                            <div class="text-secondary-subtle small fw-medium">Total Bookings</div>
-                            <div class="fs-4 fw-bold text-white my-1" th:text="${totalReservations}">0</div>
-                            <div class="small text-success"><i class="fa-solid fa-receipt me-1"></i> All Time</div>
+                            <div class="text-body-secondary small fw-medium">Total Bookings</div>
+                            <div class="fs-4 fw-bold text-body my-1" th:text="${totalReservations}">0</div>
+                            <div class="small text-body-secondary">All time</div>
                         </div>
-                        <div class="stat-icon" style="background: rgba(225, 54, 86, 0.15); color: var(--accent);">
+                        <div class="stat-icon">
                             <i class="fa-solid fa-ticket"></i>
                         </div>
                     </div>
@@ -108,11 +105,11 @@
                 <div class="col-xl-3 col-sm-6">
                     <div class="stat-card">
                         <div>
-                            <div class="text-secondary-subtle small fw-medium">Active Movies</div>
-                            <div class="fs-4 fw-bold text-white my-1" th:text="${totalMovies} + ' Movies'">3 Movies</div>
-                            <div class="small text-secondary-subtle" th:text="${totalScreens} + ' Screens across ' + ${totalTheaters} + ' Multiplexes'">Across 3 screens</div>
+                            <div class="text-body-secondary small fw-medium">Active Movies</div>
+                            <div class="fs-4 fw-bold text-body my-1" th:text="${totalMovies} + ' Movies'">3 Movies</div>
+                            <div class="small text-body-secondary" th:text="${totalScreens} + ' screens across ' + ${totalTheaters} + ' theaters'">Across 3 screens</div>
                         </div>
-                        <div class="stat-icon" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa;">
+                        <div class="stat-icon">
                             <i class="fa-solid fa-clapperboard"></i>
                         </div>
                     </div>
@@ -121,11 +118,11 @@
                 <div class="col-xl-3 col-sm-6">
                     <div class="stat-card">
                         <div>
-                            <div class="text-secondary-subtle small fw-medium">Scheduled Shows</div>
-                            <div class="fs-4 fw-bold text-white my-1" th:text="${totalShowtimes}">4</div>
-                            <div class="small text-gold"><i class="fa-solid fa-calendar-check me-1"></i> Ready for booking</div>
+                            <div class="text-body-secondary small fw-medium">Scheduled Shows</div>
+                            <div class="fs-4 fw-bold text-body my-1" th:text="${totalShowtimes}">4</div>
+                            <div class="small text-body-secondary">Open for booking</div>
                         </div>
-                        <div class="stat-icon" style="background: rgba(255, 183, 3, 0.15); color: var(--gold);">
+                        <div class="stat-icon">
                             <i class="fa-solid fa-chart-line"></i>
                         </div>
                     </div>
@@ -136,13 +133,12 @@
             <div class="row g-4 mb-5" id="analytics">
                 <!-- Daily Bookings Chart -->
                 <div class="col-lg-4 col-md-6">
-                    <div class="card border-0 shadow-sm p-4 h-100" style="background: var(--bg-surface); border: 1px solid var(--border-subtle) !important; border-radius: 16px;">
+                    <div class="theater-card h-100">
                         <div class="d-flex align-items-center justify-content-between mb-3">
                             <div>
-                                <div class="text-secondary-subtle small fw-medium">Trend (7 Days)</div>
-                                <h6 class="fw-bold text-white mb-0"><i class="fa-solid fa-ticket text-accent me-1"></i> Daily Bookings</h6>
+                                <div class="text-body-secondary small fw-medium">Last 7 days</div>
+                                <h6 class="fw-bold text-body mb-0">Bookings per day</h6>
                             </div>
-                            <span class="badge bg-danger-subtle text-danger border border-danger">Volume</span>
                         </div>
                         <div style="height: 200px; position: relative;">
                             <canvas id="bookingsChart"></canvas>
@@ -152,13 +148,12 @@
 
                 <!-- Daily Revenue Chart -->
                 <div class="col-lg-4 col-md-6">
-                    <div class="card border-0 shadow-sm p-4 h-100" style="background: var(--bg-surface); border: 1px solid var(--border-subtle) !important; border-radius: 16px;">
+                    <div class="theater-card h-100">
                         <div class="d-flex align-items-center justify-content-between mb-3">
                             <div>
-                                <div class="text-secondary-subtle small fw-medium">Revenue (7 Days)</div>
-                                <h6 class="fw-bold text-white mb-0"><i class="fa-solid fa-indian-rupee-sign text-gold me-1"></i> Daily Revenue</h6>
+                                <div class="text-body-secondary small fw-medium">Last 7 days</div>
+                                <h6 class="fw-bold text-body mb-0">Revenue per day</h6>
                             </div>
-                            <span class="badge bg-warning-subtle text-warning border border-warning">Finance</span>
                         </div>
                         <div style="height: 200px; position: relative;">
                             <canvas id="revenueChart"></canvas>
@@ -168,17 +163,16 @@
 
                 <!-- Popular Movies Chart -->
                 <div class="col-lg-4 col-md-12">
-                    <div class="card border-0 shadow-sm p-4 h-100" style="background: var(--bg-surface); border: 1px solid var(--border-subtle) !important; border-radius: 16px;">
+                    <div class="theater-card h-100">
                         <div class="d-flex align-items-center justify-content-between mb-3">
                             <div>
-                                <div class="text-secondary-subtle small fw-medium">All Time Demand</div>
-                                <h6 class="fw-bold text-white mb-0"><i class="fa-solid fa-fire text-accent me-1"></i> Popular Movies</h6>
+                                <div class="text-body-secondary small fw-medium">All time</div>
+                                <h6 class="fw-bold text-body mb-0">Top movies</h6>
                             </div>
-                            <span class="badge bg-info-subtle text-info border border-info">Popularity</span>
                         </div>
                         <div style="height: 200px; position: relative;">
                             <canvas id="popularMoviesChart" th:if="${chartMovieTitlesJson != '[]'}"></canvas>
-                            <p th:unless="${chartMovieTitlesJson != '[]'}" class="text-secondary-subtle small text-center pt-5">No bookings yet, so no popular movies to show.</p>
+                            <p th:unless="${chartMovieTitlesJson != '[]'}" class="text-body-secondary small text-center pt-5">No bookings yet, so no popular movies to show.</p>
                         </div>
                     </div>
                 </div>
@@ -188,7 +182,7 @@
             <div class="table-custom mb-5" id="bookings">
                 <div class="d-flex flex-wrap justify-content-between align-items-center p-3 border-bottom gap-3" style="border-color: var(--border-subtle) !important;">
                     <div class="d-flex align-items-center gap-2">
-                        <h5 class="fw-bold text-white mb-0"><i class="fa-solid fa-receipt text-accent me-2"></i> System Reservations</h5>
+                        <h5 class="fw-bold text-body mb-0">Reservations</h5>
                         <span class="badge bg-secondary" th:text="${reservationPage.totalElements}">0</span>
                     </div>
                     <div class="d-flex flex-wrap gap-2">
@@ -210,13 +204,13 @@
                     </div>
                 </div>
                 <div class="table-responsive">
-                    <table class="table table-dark table-hover mb-0" style="background: transparent;">
+                    <table class="table table-hover mb-0">
                         <thead>
                             <tr>
-                                <th>Ref Code</th>
+                                <th>Booking</th>
                                 <th>Customer</th>
                                 <th>Movie</th>
-                                <th>Theater / Screen</th>
+                                <th>Theater</th>
                                 <th>Showtime</th>
                                 <th>Seats</th>
                                 <th>Amount</th>
@@ -225,29 +219,29 @@
                         </thead>
                         <tbody>
                             <tr th:if="${reservations.isEmpty()}">
-                                <td colspan="8" class="text-center py-4 text-secondary-subtle">No reservations matching filter.</td>
+                                <td colspan="8" class="text-center py-4 text-body-secondary">No reservations matching filter.</td>
                             </tr>
                             <tr th:each="res : ${reservations}">
-                                <td class="fw-bold text-white fw-mono" th:text="'#' + ${res.bookingReference}">#CP-928410</td>
+                                <td class="fw-semibold font-monospace small text-nowrap" th:text="${res.bookingReference}">#CP-928410</td>
                                 <td>
-                                    <div class="text-white fw-semibold" th:text="${res.user.name}">Rahul Sharma</div>
-                                    <div class="text-secondary-subtle small" style="font-size: 0.75rem;" th:text="${res.user.email}">user@example.com</div>
+                                    <div class="text-body fw-semibold" th:text="${res.user.name}">Rahul Sharma</div>
+                                    <div class="text-body-secondary small" style="font-size: 0.75rem;" th:text="${res.user.email}">user@example.com</div>
                                 </td>
-                                <td><span class="text-white fw-semibold" th:text="${res.showtime.movie.title}">Dune: Part Two</span></td>
+                                <td style="min-width: 160px;"><span class="text-body fw-semibold" th:text="${res.showtime.movie.title}">Dune: Part Two</span></td>
                                 <td>
                                     <span th:text="${res.showtime.screen.theater.name}">PVR ICON</span> 
-                                    <span class="badge bg-secondary-subtle text-white border border-subtle ms-1" th:text="'Screen ' + ${res.showtime.screen.screenNumber}">Screen 1</span>
+                                    <div class="text-body-secondary small" th:text="'Screen ' + ${res.showtime.screen.screenNumber}">Screen 1</div>
                                 </td>
-                                <td th:text="${#temporals.format(res.showtime.startTime, 'dd MMM, hh:mm a')}">Today, 08:45 PM</td>
+                                <td class="text-nowrap" th:text="${#temporals.format(res.showtime.startTime, 'dd MMM, hh:mm a')}">Today, 08:45 PM</td>
                                 <td>
-                                    <span class="badge bg-danger-subtle text-danger border border-danger me-1" th:text="${res.seatSummary}">C4</span>
+                                    <span class="text-nowrap" th:text="${res.seatSummary}">C4</span>
                                 </td>
-                                <td class="fw-bold text-white" th:text="'₹' + ${res.totalAmount}">₹560</td>
+                                <td class="fw-semibold text-nowrap" th:text="'₹' + ${#numbers.formatDecimal(res.totalAmount, 1, 'COMMA', 2, 'POINT')}">₹560</td>
                                 <td>
-                                    <span th:if="${res.status.name() == 'CONFIRMED'}" class="badge bg-success">CONFIRMED</span>
-                                    <span th:if="${res.status.name() == 'PENDING'}" class="badge bg-warning text-dark">PENDING</span>
-                                    <span th:if="${res.status.name() == 'CANCELLED'}" class="badge bg-danger">CANCELLED</span>
-                                    <span th:if="${res.status.name() == 'EXPIRED'}" class="badge bg-secondary">EXPIRED</span>
+                                    <span th:if="${res.status.name() == 'CONFIRMED'}" class="badge bg-success-subtle text-success-emphasis">Confirmed</span>
+                                    <span th:if="${res.status.name() == 'PENDING'}" class="badge bg-warning-subtle text-warning-emphasis">Pending</span>
+                                    <span th:if="${res.status.name() == 'CANCELLED'}" class="badge bg-danger-subtle text-danger-emphasis">Cancelled</span>
+                                    <span th:if="${res.status.name() == 'EXPIRED'}" class="badge bg-secondary-subtle text-secondary-emphasis">Expired</span>
                                 </td>
                             </tr>
                         </tbody>
@@ -255,7 +249,7 @@
                 </div>
                 <nav th:if="${reservationPage.totalPages > 1}" aria-label="Reservations pages"
                      class="d-flex justify-content-between align-items-center p-3 border-top small" style="border-color: var(--border-subtle) !important;">
-                    <span class="text-secondary-subtle"
+                    <span class="text-body-secondary"
                           th:text="'Page ' + ${reservationPage.number + 1} + ' of ' + ${reservationPage.totalPages}">Page 1 of 3</span>
                     <div class="d-flex gap-2">
                         <a th:if="${reservationPage.hasPrevious()}" class="btn btn-sm btn-outline-custom"
@@ -273,16 +267,16 @@
             <!-- Current Movie Catalog Section -->
             <div class="table-custom mb-5" id="movies">
                 <div class="d-flex justify-content-between align-items-center p-3 border-bottom" style="border-color: var(--border-subtle) !important;">
-                    <h5 class="fw-bold text-white mb-0"><i class="fa-solid fa-film text-accent me-2"></i> Movies in System</h5>
+                    <h5 class="fw-bold text-body mb-0">Movies</h5>
                     <div class="d-flex gap-2">
-                        <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#syncTmdbModal">
-                            <i class="fa-solid fa-cloud-arrow-down me-1"></i> Sync from TMDb
+                        <button class="btn btn-sm btn-outline-custom" data-bs-toggle="modal" data-bs-target="#syncTmdbModal">
+                            Sync from TMDb
                         </button>
                         <button class="btn btn-sm btn-accent" data-bs-toggle="modal" data-bs-target="#addMovieModal">+ Add Movie</button>
                     </div>
                 </div>
                 <div class="table-responsive">
-                    <table class="table table-dark table-hover mb-0" style="background: transparent;">
+                    <table class="table table-hover mb-0">
                         <thead>
                             <tr>
                                 <th>ID</th>
@@ -296,8 +290,8 @@
                         </thead>
                         <tbody>
                             <tr th:each="m : ${movies}">
-                                <td class="text-secondary-subtle" th:text="${m.id}">1</td>
-                                <td class="fw-bold text-white" th:text="${m.title}">Dune: Part Two</td>
+                                <td class="text-body-secondary" th:text="${m.id}">1</td>
+                                <td class="fw-bold text-body" th:text="${m.title}">Dune: Part Two</td>
                                 <td th:text="${m.genre}">Sci-Fi</td>
                                 <td th:text="${m.language}">English</td>
                                 <td th:text="${m.durationInMinutes + ' min'}">166 min</td>
@@ -317,14 +311,14 @@
             <!-- MODAL 0: Sync TMDb Live Movies -->
             <div class="modal fade" id="syncTmdbModal" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content bg-surface border border-subtle text-white">
+                    <div class="modal-content bg-surface border border-subtle text-body">
                         <div class="modal-header border-bottom border-subtle">
-                            <h5 class="modal-title fw-bold"><i class="fa-solid fa-cloud-arrow-down text-info me-2"></i> Sync Live Movies from TMDb</h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <h5 class="modal-title fw-bold">Sync movies from TMDb</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <form th:action="@{/admin/movies/sync-tmdb}" method="post" id="tmdbSyncForm">
                             <div class="modal-body">
-                                <div class="p-3 mb-3 rounded-3" style="background: rgba(13, 202, 240, 0.1); border: 1px solid rgba(13, 202, 240, 0.25);">
+                                <div class="p-3 mb-3 rounded-2 border bg-surface-elevated">
                                     <div class="d-flex gap-2">
                                         <i class="fa-solid fa-circle-info text-info mt-1"></i>
                                         <div class="small">
@@ -334,7 +328,7 @@
                                 </div>
 
                                 <div class="mb-3">
-                                    <label class="form-label small text-secondary-subtle d-flex justify-content-between">
+                                    <label class="form-label small text-body-secondary d-flex justify-content-between">
                                         <span>TMDb API Key (v3 auth)</span>
                                         <a href="https://www.themoviedb.org/settings/api" target="_blank" class="text-info text-decoration-none">
                                             <i class="fa-solid fa-arrow-up-right-from-square me-1"></i>Get Free Key
@@ -342,7 +336,7 @@
                                     </label>
                                     <input type="password" name="apiKey" class="form-control font-monospace" autocomplete="off"
                                            th:placeholder="${isTmdbConfigured} ? 'Configured via TMDB_API_KEY (leave empty to use)' : 'Paste your TMDb API Key'">
-                                    <div class="form-text small text-secondary-subtle">
+                                    <div class="form-text small text-body-secondary">
                                         <span th:if="${isTmdbConfigured}" class="text-success">
                                             <i class="fa-solid fa-circle-check me-1"></i> Default key detected in config.
                                         </span>
@@ -373,43 +367,43 @@
             <!-- MODAL 1: Add Movie -->
             <div class="modal fade" id="addMovieModal" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content bg-surface border border-subtle text-white">
+                    <div class="modal-content bg-surface border border-subtle text-body">
                         <div class="modal-header border-bottom border-subtle">
-                            <h5 class="modal-title fw-bold"><i class="fa-solid fa-film text-accent me-2"></i> Add New Movie</h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <h5 class="modal-title fw-bold">Add movie</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <form th:action="@{/admin/movies}" method="post">
                             <div class="modal-body">
                                 <div class="mb-3">
-                                    <label class="form-label small text-secondary-subtle">Movie Title</label>
+                                    <label class="form-label small text-body-secondary">Movie Title</label>
                                     <input type="text" name="title" class="form-control" required placeholder="e.g. Inception">
                                 </div>
                                 <div class="row g-2 mb-3">
                                     <div class="col-6">
-                                        <label class="form-label small text-secondary-subtle">Genre</label>
+                                        <label class="form-label small text-body-secondary">Genre</label>
                                         <input type="text" name="genre" class="form-control" required placeholder="e.g. Sci-Fi, Thriller">
                                     </div>
                                     <div class="col-6">
-                                        <label class="form-label small text-secondary-subtle">Language</label>
+                                        <label class="form-label small text-body-secondary">Language</label>
                                         <input type="text" name="language" class="form-control" required placeholder="e.g. English">
                                     </div>
                                 </div>
                                 <div class="row g-2 mb-3">
                                     <div class="col-6">
-                                        <label class="form-label small text-secondary-subtle">Duration (mins)</label>
+                                        <label class="form-label small text-body-secondary">Duration (mins)</label>
                                         <input type="number" name="durationInMinutes" class="form-control" required placeholder="148" value="120">
                                     </div>
                                     <div class="col-6">
-                                        <label class="form-label small text-secondary-subtle">Rating (out of 10)</label>
+                                        <label class="form-label small text-body-secondary">Rating (out of 10)</label>
                                         <input type="number" step="0.1" name="rating" class="form-control" placeholder="8.8" value="8.5">
                                     </div>
                                 </div>
                                 <div class="mb-3">
-                                    <label class="form-label small text-secondary-subtle">Poster URL</label>
+                                    <label class="form-label small text-body-secondary">Poster URL</label>
                                     <input type="url" name="posterUrl" class="form-control" placeholder="https://images.unsplash.com/...">
                                 </div>
                                 <div class="mb-3">
-                                    <label class="form-label small text-secondary-subtle">Description</label>
+                                    <label class="form-label small text-body-secondary">Description</label>
                                     <textarea name="description" class="form-control" rows="3" placeholder="Movie synopsis..."></textarea>
                                 </div>
                             </div>
@@ -425,23 +419,23 @@
             <!-- MODAL 2: Add Theater -->
             <div class="modal fade" id="addTheaterModal" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content bg-surface border border-subtle text-white">
+                    <div class="modal-content bg-surface border border-subtle text-body">
                         <div class="modal-header border-bottom border-subtle">
-                            <h5 class="modal-title fw-bold"><i class="fa-solid fa-building text-accent me-2"></i> Add Theater Multiplex</h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <h5 class="modal-title fw-bold">Add theater</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <form th:action="@{/admin/theaters}" method="post">
                             <div class="modal-body">
                                 <div class="mb-3">
-                                    <label class="form-label small text-secondary-subtle">Theater Name</label>
+                                    <label class="form-label small text-body-secondary">Theater Name</label>
                                     <input type="text" name="name" class="form-control" required placeholder="e.g. Cinepolis Nexus Mall">
                                 </div>
                                 <div class="mb-3">
-                                    <label class="form-label small text-secondary-subtle">Location / Address</label>
+                                    <label class="form-label small text-body-secondary">Location / Address</label>
                                     <input type="text" name="location" class="form-control" required placeholder="e.g. Koramangala, 5th Block">
                                 </div>
                                 <div class="mb-3">
-                                    <label class="form-label small text-secondary-subtle">City</label>
+                                    <label class="form-label small text-body-secondary">City</label>
                                     <input type="text" name="city" class="form-control" required placeholder="e.g. Bengaluru">
                                 </div>
                             </div>
@@ -457,44 +451,44 @@
             <!-- MODAL: Add Screen (auto-generates the seat grid) -->
             <div class="modal fade" id="addScreenModal" tabindex="-1" aria-labelledby="addScreenTitle" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content bg-surface border border-subtle text-white">
+                    <div class="modal-content bg-surface border border-subtle text-body">
                         <div class="modal-header border-bottom border-subtle">
-                            <h5 class="modal-title fw-bold" id="addScreenTitle"><i class="fa-solid fa-couch text-accent me-2"></i> Add Screen &amp; Seats</h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <h5 class="modal-title fw-bold" id="addScreenTitle">Add Screen &amp; Seats</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <form th:action="@{/admin/screens}" method="post">
                             <div class="modal-body">
                                 <div class="mb-3">
-                                    <label for="scrTheater" class="form-label small text-secondary-subtle">Theater</label>
-                                    <select id="scrTheater" name="theaterId" class="form-select bg-dark text-white border-secondary" required>
+                                    <label for="scrTheater" class="form-label small text-body-secondary">Theater</label>
+                                    <select id="scrTheater" name="theaterId" class="form-select" required>
                                         <option th:each="t : ${theaters}" th:value="${t.id}" th:text="${t.name} + ' (' + ${t.city} + ')'">PVR ICON</option>
                                     </select>
                                 </div>
                                 <div class="row g-3 mb-3">
                                     <div class="col-4">
-                                        <label for="scrNumber" class="form-label small text-secondary-subtle">Screen No.</label>
+                                        <label for="scrNumber" class="form-label small text-body-secondary">Screen No.</label>
                                         <input id="scrNumber" type="number" name="screenNumber" class="form-control" min="1" value="1" required>
                                     </div>
                                     <div class="col-4">
-                                        <label for="scrRows" class="form-label small text-secondary-subtle">Rows</label>
+                                        <label for="scrRows" class="form-label small text-body-secondary">Rows</label>
                                         <input id="scrRows" type="number" name="rows" class="form-control" min="1" max="26" value="6" required>
                                     </div>
                                     <div class="col-4">
-                                        <label for="scrPerRow" class="form-label small text-secondary-subtle">Seats / Row</label>
+                                        <label for="scrPerRow" class="form-label small text-body-secondary">Seats / Row</label>
                                         <input id="scrPerRow" type="number" name="seatsPerRow" class="form-control" min="1" max="30" value="10" required>
                                     </div>
                                 </div>
                                 <div class="row g-3">
                                     <div class="col-6">
-                                        <label for="scrRecliner" class="form-label small text-secondary-subtle">Recliner rows (front, 2.0x)</label>
+                                        <label for="scrRecliner" class="form-label small text-body-secondary">Recliner rows (front, 2.0x)</label>
                                         <input id="scrRecliner" type="number" name="reclinerRows" class="form-control" min="0" max="26" value="1">
                                     </div>
                                     <div class="col-6">
-                                        <label for="scrPremium" class="form-label small text-secondary-subtle">Premium rows (next, 1.5x)</label>
+                                        <label for="scrPremium" class="form-label small text-body-secondary">Premium rows (next, 1.5x)</label>
                                         <input id="scrPremium" type="number" name="premiumRows" class="form-control" min="0" max="26" value="2">
                                     </div>
                                 </div>
-                                <div class="form-text small text-secondary-subtle mt-2">Remaining rows are Regular (1.0x). Rows are labelled A, B, C…</div>
+                                <div class="form-text small text-body-secondary mt-2">Remaining rows are Regular (1.0x). Rows are labelled A, B, C…</div>
                             </div>
                             <div class="modal-footer border-top border-subtle">
                                 <button type="button" class="btn btn-outline-custom" data-bs-dismiss="modal">Cancel</button>
@@ -508,39 +502,39 @@
             <!-- MODAL 3: Schedule Showtime -->
             <div class="modal fade" id="addShowtimeModal" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content bg-surface border border-subtle text-white">
+                    <div class="modal-content bg-surface border border-subtle text-body">
                         <div class="modal-header border-bottom border-subtle">
-                            <h5 class="modal-title fw-bold"><i class="fa-solid fa-calendar-plus text-accent me-2"></i> Schedule Showtime</h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <h5 class="modal-title fw-bold">Schedule show</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <form th:action="@{/admin/showtimes}" method="post">
                             <div class="modal-body">
                                 <div class="mb-3">
-                                    <label class="form-label small text-secondary-subtle">Select Movie</label>
-                                    <select name="movieId" class="form-select bg-dark text-white border-secondary" required>
+                                    <label class="form-label small text-body-secondary">Select Movie</label>
+                                    <select name="movieId" class="form-select" required>
                                         <option th:each="mov : ${movies}" th:value="${mov.id}" th:text="${mov.title} + ' (' + ${mov.language} + ')'">Dune</option>
                                     </select>
                                 </div>
                                 <div class="mb-3">
-                                    <label class="form-label small text-secondary-subtle">Select Auditorium Screen</label>
-                                    <select name="screenId" class="form-select bg-dark text-white border-secondary" required>
+                                    <label class="form-label small text-body-secondary">Select Auditorium Screen</label>
+                                    <select name="screenId" class="form-select" required>
                                         <option th:each="sc : ${screens}" th:value="${sc.id}" th:text="'Screen ' + ${sc.screenNumber} + ' (' + ${sc.theater.name} + ')'">Screen 1</option>
                                     </select>
                                 </div>
                                 <div class="row g-2 mb-3">
                                     <div class="col-7">
-                                        <label class="form-label small text-secondary-subtle">Start Time</label>
+                                        <label class="form-label small text-body-secondary">Start Time</label>
                                         <input type="datetime-local" name="startTime" class="form-control" required>
                                     </div>
                                     <div class="col-5">
-                                        <label class="form-label small text-secondary-subtle">Base Price (₹)</label>
+                                        <label class="form-label small text-body-secondary">Base Price (₹)</label>
                                         <input type="number" step="10" name="price" class="form-control" required placeholder="250" value="250">
                                     </div>
                                 </div>
                             </div>
                             <div class="modal-footer border-top border-subtle">
                                 <button type="button" class="btn btn-outline-custom" data-bs-dismiss="modal">Cancel</button>
-                                <button type="submit" class="btn btn-accent">Schedule Showtime</button>
+                                <button type="submit" class="btn btn-accent">Schedule show</button>
                             </div>
                         </form>
                     </div>
@@ -571,10 +565,10 @@
                 plugins: {
                     legend: { display: false },
                     tooltip: {
-                        backgroundColor: '#1c1c28',
+                        backgroundColor: '#1b1b1f',
                         titleColor: '#fff',
-                        bodyColor: '#e13656',
-                        borderColor: 'rgba(255,255,255,0.1)',
+                        bodyColor: '#ffffff',
+                        borderColor: '#1b1b1f',
                         borderWidth: 1,
                         padding: 10,
                         displayColors: false
@@ -582,13 +576,13 @@
                 },
                 scales: {
                     x: {
-                        grid: { color: 'rgba(255,255,255,0.04)' },
-                        ticks: { color: '#9ca3af', font: { size: 11 } }
+                        grid: { color: '#ececf0' },
+                        ticks: { color: '#5c5c66', font: { size: 11 } }
                     },
                     y: {
                         beginAtZero: true,
-                        grid: { color: 'rgba(255,255,255,0.04)' },
-                        ticks: { color: '#9ca3af', font: { size: 11 }, precision: 0 }
+                        grid: { color: '#ececf0' },
+                        ticks: { color: '#5c5c66', font: { size: 11 }, precision: 0 }
                     }
                 }
             };
@@ -603,8 +597,8 @@
                         datasets: [{
                             label: 'Bookings',
                             data: bookingsData,
-                            backgroundColor: '#e13656',
-                            hoverBackgroundColor: '#ff4b72',
+                            backgroundColor: '#d32940',
+                            hoverBackgroundColor: '#b51f34',
                             borderRadius: 6,
                             barPercentage: 0.55
                         }]
@@ -623,11 +617,11 @@
                         datasets: [{
                             label: 'Revenue (₹)',
                             data: revenueData,
-                            borderColor: '#ffb703',
-                            backgroundColor: 'rgba(255, 183, 3, 0.12)',
+                            borderColor: '#e09600',
+                            backgroundColor: 'rgba(224, 150, 0, 0.12)',
                             fill: true,
                             tension: 0.35,
-                            pointBackgroundColor: '#ffb703',
+                            pointBackgroundColor: '#e09600',
                             pointRadius: 4,
                             pointHoverRadius: 6
                         }]
@@ -657,15 +651,15 @@
                         datasets: [{
                             data: movieCounts,
                             backgroundColor: [
-                                '#e13656',
+                                '#d32940',
                                 '#3b82f6',
                                 '#10b981',
-                                '#ffb703',
+                                '#e09600',
                                 '#8b5cf6',
                                 '#ec4899'
                             ],
                             borderWidth: 2,
-                            borderColor: '#14141c'
+                            borderColor: '#ffffff'
                         }]
                     },
                     options: {
@@ -675,13 +669,13 @@
                             legend: {
                                 display: true,
                                 position: 'bottom',
-                                labels: { color: '#d1d5db', boxWidth: 12, font: { size: 10 } }
+                                labels: { color: '#5c5c66', boxWidth: 12, font: { size: 10 } }
                             },
                             tooltip: {
-                                backgroundColor: '#1c1c28',
+                                backgroundColor: '#1b1b1f',
                                 titleColor: '#fff',
-                                bodyColor: '#10b981',
-                                borderColor: 'rgba(255,255,255,0.1)',
+                                bodyColor: '#ffffff',
+                                borderColor: '#1b1b1f',
                                 borderWidth: 1
                             }
                         },

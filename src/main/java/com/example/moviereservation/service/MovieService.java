@@ -60,7 +60,7 @@ public class MovieService {
         if (!movieRepository.existsById(movieId)) {
             throw new ResourceNotFoundException("Movie not found with ID: " + movieId);
         }
-        return showtimeRepository.findByMovieIdAndStartTimeAfter(movieId, LocalDateTime.now());
+        return showtimeRepository.findByMovieIdAndStartTimeAfterOrderByStartTimeAsc(movieId, LocalDateTime.now());
     }
 
     public Map<LocalDate, Map<String, List<Showtime>>> getGroupedShowtimesForMovie(Long movieId) {

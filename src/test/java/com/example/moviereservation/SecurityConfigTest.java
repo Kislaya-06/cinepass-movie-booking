@@ -30,6 +30,14 @@ class SecurityConfigTest {
     private com.example.moviereservation.repository.ReservationRepository reservationRepository;
 
     @Test
+    @WithUserDetails("admin@cinepass.com")
+    void adminIsKeptOutOfTheBookingFlow() throws Exception {
+        mockMvc.perform(get("/")).andExpect(header().string("Location", "/admin/dashboard"));
+        mockMvc.perform(get("/my-bookings")).andExpect(status().isForbidden());
+        mockMvc.perform(get("/showtimes/1/seats")).andExpect(status().isForbidden());
+    }
+
+    @Test
     void healthIsPublicAndFramesAreSameOriginOnly() throws Exception {
         mockMvc.perform(get("/actuator/health"))
                 .andExpect(status().isOk())

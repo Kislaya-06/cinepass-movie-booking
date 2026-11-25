@@ -10,15 +10,12 @@
         <div class="auth-card" style="max-width: 480px;">
             <!-- Card Header -->
             <div class="text-center mb-4">
-                <div class="d-inline-flex align-items-center justify-content-center p-3 rounded-circle mb-3" style="background: rgba(225, 54, 86, 0.1); border: 1px solid rgba(225, 54, 86, 0.25);">
-                    <i class="fa-solid fa-user-plus text-accent fs-3"></i>
-                </div>
-                <h3 class="fw-bold text-white mb-1">Create an Account</h3>
-                <p class="text-secondary-subtle small">Join CinePass for quick booking, member discounts & rewards</p>
+                <h1 class="fs-4 mb-1">Create account</h1>
+                <p class="text-body-secondary small">Book tickets faster and keep all your bookings in one place</p>
             </div>
 
             <!-- Error Alert -->
-            <div th:if="${registrationError}" class="alert alert-danger d-flex align-items-center gap-2 py-2 px-3 small rounded-3 mb-3" style="background: rgba(225, 54, 86, 0.15); color: #ff6b81; border: 1px solid rgba(225, 54, 86, 0.3);">
+            <div th:if="${registrationError}" class="alert alert-danger d-flex align-items-center gap-2 py-2 px-3 small rounded-3 mb-3">
                 <i class="fa-solid fa-circle-exclamation"></i>
                 <span th:text="${registrationError}">Email already in use.</span>
             </div>
@@ -26,7 +23,7 @@
             <!-- Register Form -->
             <form th:action="@{/register}" th:object="${registerRequest}" method="POST">
                 <div class="form-floating-custom mb-3">
-                    <label for="regName"><i class="fa-solid fa-user me-1"></i> Full Name</label>
+                    <label for="regName">Full Name</label>
                     <input type="text" th:field="*{name}" class="form-control" id="regName" placeholder="John Doe" required autofocus>
                     <div class="text-danger small mt-1" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Name error</div>
                 </div>
@@ -34,14 +31,14 @@
                 <div class="row g-2 mb-3">
                     <div class="col-md-6">
                         <div class="form-floating-custom">
-                            <label for="regEmail"><i class="fa-solid fa-envelope me-1"></i> Email</label>
+                            <label for="regEmail">Email</label>
                             <input type="email" th:field="*{email}" class="form-control" id="regEmail" placeholder="john@example.com" required>
                             <div class="text-danger small mt-1" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Email error</div>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-floating-custom">
-                            <label for="regPhone"><i class="fa-solid fa-phone me-1"></i> Phone</label>
+                            <label for="regPhone">Phone</label>
                             <input type="tel" th:field="*{phoneNumber}" class="form-control" id="regPhone" placeholder="+91 98765 43210">
                             <div class="text-danger small mt-1" th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}">Phone error</div>
                         </div>
@@ -49,25 +46,25 @@
                 </div>
 
                 <div class="form-floating-custom mb-4">
-                    <label for="regPassword"><i class="fa-solid fa-lock me-1"></i> Password</label>
+                    <label for="regPassword">Password</label>
                     <input type="password" th:field="*{password}" class="form-control" id="regPassword" placeholder="Create strong password (min 6 chars)" required>
                     <div class="text-danger small mt-1" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">Password error</div>
                 </div>
 
                 <div class="form-check mb-4">
-                    <input class="form-check-input bg-dark border-secondary" type="checkbox" id="termsAgree" required checked>
-                    <label class="form-check-label text-secondary-subtle small" for="termsAgree">
-                        I agree to the <a href="#" class="text-accent">Terms of Service</a> & <a href="#" class="text-accent">Privacy Policy</a>
+                    <input class="form-check-input" type="checkbox" id="termsAgree" required checked>
+                    <label class="form-check-label text-body-secondary small" for="termsAgree">
+                        I agree to the terms of use and privacy policy
                     </label>
                 </div>
 
                 <button type="submit" class="btn btn-accent w-100 py-2 mb-3">
-                    <i class="fa-solid fa-check me-2"></i> Register Account
+                    Create account
                 </button>
 
-                <div class="text-center text-secondary-subtle small">
+                <div class="text-center text-body-secondary small">
                     Already registered? 
-                    <a th:href="@{/login}" class="text-accent fw-bold ms-1">Sign In</a>
+                    <a th:href="@{/login}" class="text-accent fw-bold ms-1">Sign in</a>
                 </div>
             </form>
         </div>

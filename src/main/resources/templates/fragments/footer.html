@@ -3,75 +3,30 @@
 <body>
 <th:block th:fragment="footer">
 <footer class="bms-footer">
-    <div class="container px-lg-5">
-        <div class="row g-4 mb-4">
-            <div class="col-lg-4 col-md-6">
-                <div class="bms-brand mb-3">
-                    <div class="logo-icon">
-                        <i class="fa-solid fa-ticket-simple"></i>
-                    </div>
-                    <span>Cine</span>Pass
-                </div>
-                <p class="text-secondary-subtle small pe-lg-4">
-                    Experience seamless online movie ticket booking. Explore showtimes, pick your favorite seats with immersive real-time seat maps, and secure instant confirmation passes.
-                </p>
+    <div class="container-xl">
+        <div class="d-flex flex-column flex-md-row justify-content-between gap-4">
+            <div style="max-width: 360px;">
+                <a th:href="@{/}" class="bms-brand mb-2">
+                    <span class="logo-icon"><i class="fa-solid fa-ticket-simple" aria-hidden="true"></i></span>
+                    <span><span class="text-accent">Cine</span>Pass</span>
+                </a>
+                <p class="mb-0">Book movie tickets, pick your seats and get a QR ticket in your inbox.</p>
             </div>
-
-            <div class="col-lg-2 col-md-6 col-6">
-                <h6 class="text-white fw-bold mb-3">Movies</h6>
-                <ul class="list-unstyled small text-secondary-subtle d-flex flex-column gap-2">
-                    <li><a th:href="@{/}" class="text-secondary-subtle">Now Showing</a></li>
-                    <li><a th:href="@{/}" class="text-secondary-subtle">Upcoming Releases</a></li>
-                    <li><a th:href="@{/}" class="text-secondary-subtle">IMAX Experience</a></li>
-                    <li><a th:href="@{/}" class="text-secondary-subtle">4DX & 3D</a></li>
-                </ul>
-            </div>
-
-            <div class="col-lg-2 col-md-6 col-6">
-                <h6 class="text-white fw-bold mb-3">Quick Links</h6>
-                <ul class="list-unstyled small text-secondary-subtle d-flex flex-column gap-2">
-                    <li><a th:href="@{/my-bookings}" class="text-secondary-subtle">My Bookings</a></li>
-                    <li><a th:href="@{/login}" class="text-secondary-subtle">Customer Login</a></li>
-                    <li><a th:href="@{/register}" class="text-secondary-subtle">Register Account</a></li>
-                    <li><a th:href="@{/admin/dashboard}" class="text-secondary-subtle">Theater Admin</a></li>
-                </ul>
-            </div>
-
-            <div class="col-lg-4 col-md-6">
-                <h6 class="text-white fw-bold mb-3">24/7 Customer Care</h6>
-                <div class="d-flex align-items-center gap-3 p-3 bg-surface rounded-3 border border-subtle mb-2" style="background: var(--bg-surface); border: 1px solid var(--border-subtle);">
-                    <i class="fa-solid fa-headset fs-2 text-accent"></i>
-                    <div>
-                        <div class="text-white fw-semibold small">Need assistance?</div>
-                        <div class="text-secondary-subtle small">support@cinepass.com | +91 1800 200 4567</div>
-                    </div>
-                </div>
-                <div class="text-muted small">
-                    <i class="fa-solid fa-shield-check text-success me-1"></i> 100% Secure SSL Payment Gateways
-                </div>
-            </div>
+            <nav class="d-flex flex-wrap gap-4" aria-label="Footer">
+                <a th:href="@{/}" sec:authorize="!hasRole('ADMIN')">Movies</a>
+                <a th:href="@{/my-bookings}" sec:authorize="!hasRole('ADMIN')">My bookings</a>
+                <a th:href="@{/login}" sec:authorize="isAnonymous()">Sign in</a>
+                <a th:href="@{/register}" sec:authorize="isAnonymous()">Create account</a>
+            </nav>
         </div>
-
-        <hr style="border-color: var(--border-subtle); margin: 2rem 0 1.5rem 0;">
-
-        <div class="d-flex flex-column flex-md-row align-items-center justify-content-between text-muted small gap-2">
-            <div>
-                &copy; 2026 CinePass Entertainment Ltd. All rights reserved.
-            </div>
-            <div class="d-flex gap-3">
-                <a href="#" class="text-muted">Privacy Policy</a>
-                <span>&bull;</span>
-                <a href="#" class="text-muted">Terms of Service</a>
-                <span>&bull;</span>
-                <a th:href="@{/error-page}" class="text-muted">Error Page Demo</a>
-            </div>
-        </div>
+        <hr class="my-4">
+        <div class="small">&copy; 2026 CinePass</div>
     </div>
 </footer>
 <!-- Styled stand-in for window.confirm(); any <form data-confirm="Question?"> opens it (main.js) -->
 <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalText" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content bg-surface border border-subtle text-white">
+        <div class="modal-content bg-surface border border-subtle text-body">
             <div class="modal-body p-4">
                 <p id="confirmModalText" class="mb-0 fs-6">Are you sure?</p>
             </div>

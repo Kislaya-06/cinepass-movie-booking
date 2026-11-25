@@ -6,141 +6,69 @@
     <!-- Shared Navigation Bar -->
     <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-    <main class="flex-grow-1 py-5">
-        <div class="container px-lg-5">
-            <!-- Header -->
-            <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
-                <div>
-                    <h2 class="fw-bold text-white mb-1"><i class="fa-solid fa-ticket-simple text-accent me-2"></i> My Bookings & Passes</h2>
-                    <p class="text-secondary-subtle small mb-0">View upcoming show details, access QR passes, or download e-tickets.</p>
-                </div>
-            <!-- Flash Messages -->
-            <div th:if="${successMessage}" class="alert alert-success d-flex align-items-center gap-2 py-2 px-3 small rounded-3 mb-4" style="background: rgba(46, 213, 115, 0.15); color: #2ed573; border: 1px solid rgba(46, 213, 115, 0.3);">
-                <i class="fa-solid fa-circle-check"></i>
-                <span th:text="${successMessage}">Operation successful.</span>
+    <main class="flex-grow-1 py-4 py-lg-5">
+        <div class="container-xl" style="max-width: 960px;">
+            <h1 class="fs-3 mb-1">My bookings</h1>
+            <p class="text-body-secondary mb-4">Your tickets, newest first.</p>
+
+            <div th:if="${successMessage}" class="alert alert-success small" th:text="${successMessage}">Done.</div>
+            <div th:if="${errorMessage}" class="alert alert-danger small" th:text="${errorMessage}">Error.</div>
+
+            <div th:if="${reservations == null or reservations.isEmpty()}" class="theater-card text-center py-5">
+                <h2 class="fs-5 mb-2">No bookings yet</h2>
+                <p class="text-body-secondary mb-3">When you book a show, your tickets will appear here.</p>
+                <a th:href="@{/}" class="btn btn-accent px-4">Browse movies</a>
             </div>
 
-            <div th:if="${errorMessage}" class="alert alert-danger d-flex align-items-center gap-2 py-2 px-3 small rounded-3 mb-4" style="background: rgba(225, 54, 86, 0.15); color: #ff6b81; border: 1px solid rgba(225, 54, 86, 0.3);">
-                <i class="fa-solid fa-circle-exclamation"></i>
-                <span th:text="${errorMessage}">An error occurred.</span>
-            </div>
-
-            <!-- Empty State -->
-            <div th:if="${reservations == null or reservations.isEmpty()}" class="text-center py-5 rounded-4" style="background: var(--bg-surface); border: 1px dashed var(--border-subtle);">
-                <i class="fa-solid fa-ticket-simple text-secondary mb-3" style="font-size: 3.5rem;"></i>
-                <h4 class="text-white fw-bold">No Bookings Found</h4>
-                <p class="text-secondary-subtle mb-4">You haven't reserved any movie tickets yet. Start exploring now!</p>
-                <a th:href="@{/}" class="btn btn-accent px-4 py-2"><i class="fa-solid fa-compass me-1"></i> Explore Movies</a>
-            </div>
-
-            <!-- DYNAMIC TICKET CARD LIST -->
-            <div th:each="booking : ${reservations}" class="ticket-card flex-column flex-md-row mb-4"
-                 th:classappend="${booking.status.name() == 'CANCELLED' or booking.status.name() == 'EXPIRED' ? 'opacity-75' : ''}">
-                <div class="ticket-poster">
-                    <img th:src="${booking.showtime.movie.posterUrl}" th:alt="${booking.showtime.movie.title}"
+            <article th:each="booking : ${reservations}" class="ticket-card d-flex mb-3"
+                     th:with="st=${booking.status.name()}"
+                     th:classappend="${st == 'CANCELLED' or st == 'EXPIRED' ? 'opacity-75' : ''}">
+                <div class="ticket-poster flex-shrink-0 d-none d-sm-block" style="width: 112px;">
+                    <img th:src="${booking.showtime.movie.posterUrl}" th:alt="${booking.showtime.movie.title} + ' poster'"
                          onerror="this.src='https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=600&auto=format&fit=crop'">
                 </div>
 
                 <div class="ticket-details flex-grow-1">
-                    <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-2">
-                        <div>
-                            <!-- Status Badges -->
-                            <span th:if="${booking.status.name() == 'CONFIRMED'}" class="ticket-badge me-2">
-                                <i class="fa-solid fa-circle-check me-1"></i> CONFIRMED
-                            </span>
-                            <span th:if="${booking.status.name() == 'PENDING'}" class="badge bg-warning text-dark me-2 px-2 py-1">
-                                <i class="fa-regular fa-clock me-1"></i> PENDING PAYMENT
-                            </span>
-                            <span th:if="${booking.status.name() == 'CANCELLED'}" class="badge bg-danger-subtle text-danger border border-danger me-2 px-2 py-1">
-                                <i class="fa-solid fa-ban me-1"></i> CANCELLED
-                            </span>
-                            <span th:if="${booking.status.name() == 'EXPIRED'}" class="badge bg-secondary me-2 px-2 py-1">
-                                <i class="fa-solid fa-hourglass-end me-1"></i> EXPIRED
-                            </span>
-
-                            <span class="text-muted small">Booking Ref: <strong class="text-white fw-mono" th:text="'#' + ${booking.bookingReference}">#CP-928410</strong></span>
-                        </div>
-                        <span class="text-secondary-subtle small" th:text="'Booked: ' + ${#temporals.format(booking.createdAt, 'MMM dd, yyyy - hh:mm a')}">Booked on Sep 14, 2026</span>
+                    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-1">
+                        <h2 class="fs-5 mb-0" th:text="${booking.showtime.movie.title}">Movie title</h2>
+                        <span class="ticket-badge"
+                              th:classappend="${st == 'CONFIRMED' ? 'bg-success-subtle text-success-emphasis' : (st == 'PENDING' ? 'bg-warning-subtle text-warning-emphasis' : 'bg-secondary-subtle text-secondary-emphasis')}"
+                              th:text="${st == 'PENDING' ? 'Payment pending' : #strings.capitalize(#strings.toLowerCase(st))}">Confirmed</span>
                     </div>
+                    <div class="text-body-secondary small mb-3"
+                         th:text="${booking.showtime.screen.theater.name} + ', ' + ${booking.showtime.screen.theater.city} + ' · Screen ' + ${booking.showtime.screen.screenNumber}">Theater · Screen 1</div>
 
-                    <h4 class="fw-bold text-white mb-1" th:text="${booking.showtime.movie.title}">Dune: Part Two</h4>
-                    <div class="text-secondary-subtle small mb-3">
-                        <span th:text="${booking.showtime.screen.theater.name} + ' (' + ${booking.showtime.screen.theater.city} + ')'">PVR ICON</span> • 
-                        <span th:text="'Screen ' + ${booking.showtime.screen.screenNumber}">Audi 1</span>
-                    </div>
-
-                    <div class="row g-3 py-2 border-top border-bottom border-subtle mb-3" style="border-color: var(--border-subtle) !important;">
-                        <div class="col-sm-4 col-6">
-                            <div class="text-muted small">Date & Showtime</div>
-                            <div class="text-white fw-semibold small" th:text="${#temporals.format(booking.showtime.startTime, 'EEE, dd MMM yyyy')}">Today, 14 Sep 2026</div>
-                            <div class="text-gold small" style="font-size: 0.78rem;">
-                                <i class="fa-solid fa-clock me-1"></i>
-                                <span th:text="${#temporals.format(booking.showtime.startTime, 'hh:mm a')}">08:45 PM</span>
-                            </div>
+                    <div class="row g-3 small mb-3">
+                        <div class="col-6 col-md-4">
+                            <div class="text-body-secondary">Show</div>
+                            <div class="fw-semibold" th:text="${#temporals.format(booking.showtime.startTime, 'EEE, dd MMM · hh:mm a')}">Wed, 25 Nov · 06:49 PM</div>
                         </div>
-                        <div class="col-sm-4 col-6">
-                            <div class="text-muted small">Seats</div>
-                            <div class="d-flex flex-wrap gap-1 mt-1">
-                                <span class="badge bg-danger-subtle text-danger border border-danger" th:text="${booking.seatSummary}">C4</span>
-                            </div>
+                        <div class="col-6 col-md-4">
+                            <div class="text-body-secondary">Seats</div>
+                            <div class="fw-semibold" th:text="${booking.seatSummary}">C4, C5</div>
                         </div>
-                        <div class="col-sm-4 col-12">
-                            <div class="text-muted small">Total Amount</div>
-                            <div class="text-white fw-bold fs-6" th:text="'₹' + ${booking.totalAmount}">₹560</div>
-                            <div class="text-secondary-subtle small" style="font-size: 0.75rem;" th:if="${booking.confirmedAt != null}" th:text="'Paid: ' + ${#temporals.format(booking.confirmedAt, 'dd MMM, hh:mm a')}">Paid</div>
+                        <div class="col-6 col-md-4">
+                            <div class="text-body-secondary">Amount</div>
+                            <div class="fw-semibold" th:text="'₹' + ${#numbers.formatDecimal(booking.totalAmount, 1, 'COMMA', 2, 'POINT')}">₹560.00</div>
                         </div>
                     </div>
 
-                    <!-- Action Buttons -->
                     <div class="d-flex flex-wrap align-items-center gap-2">
-                        <!-- Pending: Pay Now -->
-                        <a th:if="${booking.status.name() == 'PENDING'}" th:href="@{'/reservations/' + ${booking.id} + '/payment'}" class="btn btn-sm btn-accent">
-                            <i class="fa-solid fa-credit-card me-1"></i> Complete Payment Now
-                        </a>
-
-                        <!-- Confirmed: Download Ticket PDF & View Pass -->
-                        <a th:if="${booking.status.name() == 'CONFIRMED'}" th:href="@{'/reservations/' + ${booking.id} + '/ticket'}" class="btn btn-sm btn-accent">
-                            <i class="fa-solid fa-file-arrow-down me-1"></i> Download Ticket
-                        </a>
-                        <a th:if="${booking.status.name() == 'CONFIRMED'}" th:href="@{'/reservations/' + ${booking.id} + '/success'}" class="btn btn-sm btn-outline-custom">
-                            <i class="fa-solid fa-ticket me-1"></i> View Pass
-                        </a>
-
-                        <!-- Cancel Button (Allowed if CONFIRMED or PENDING) -->
-                        <form th:if="${booking.status.name() == 'CONFIRMED' or booking.status.name() == 'PENDING'}"
-                              th:action="@{'/reservations/' + ${booking.id} + '/cancel'}" method="post" class="m-0" data-confirm="Are you sure you want to cancel this reservation?">
-                            <button type="submit" class="btn btn-sm btn-outline-danger">
-                                <i class="fa-solid fa-ban me-1"></i> Cancel Booking
-                            </button>
+                        <a th:if="${st == 'PENDING'}" th:href="@{'/reservations/' + ${booking.id} + '/payment'}" class="btn btn-sm btn-accent">Complete payment</a>
+                        <a th:if="${st == 'CONFIRMED'}" th:href="@{'/reservations/' + ${booking.id} + '/ticket'}" class="btn btn-sm btn-accent">Download ticket</a>
+                        <a th:if="${st == 'CONFIRMED'}" th:href="@{'/reservations/' + ${booking.id} + '/success'}" class="btn btn-sm btn-outline-custom">View ticket</a>
+                        <a th:if="${st == 'CANCELLED' or st == 'EXPIRED'}" th:href="@{'/movies/' + ${booking.showtime.movie.id}}" class="btn btn-sm btn-outline-custom">Book again</a>
+                        <form th:if="${(st == 'CONFIRMED' or st == 'PENDING') and booking.showtime.startTime.isAfter(T(java.time.LocalDateTime).now())}" th:action="@{'/reservations/' + ${booking.id} + '/cancel'}"
+                              method="post" class="m-0 ms-auto" data-confirm="Cancel this booking? Your seats will be released.">
+                            <button type="submit" class="btn btn-sm btn-link text-body-secondary text-decoration-none">Cancel booking</button>
                         </form>
-
-                        <!-- Cancelled/Expired: Book Again -->
-                        <a th:if="${booking.status.name() == 'CANCELLED' or booking.status.name() == 'EXPIRED'}"
-                           th:href="@{'/movies/' + ${booking.showtime.movie.id}}" class="btn btn-sm btn-outline-custom">
-                            <i class="fa-solid fa-rotate me-1"></i> Book Again
-                        </a>
+                    </div>
+                    <div class="text-body-secondary small mt-2">
+                        Ref <span class="fw-mono" th:text="${booking.bookingReference}">CP-928410</span>
+                        · booked <span th:text="${#temporals.format(booking.createdAt, 'dd MMM yyyy')}">25 Nov 2026</span>
                     </div>
                 </div>
-
-                <!-- QR Section -->
-                <div class="ticket-qr-section text-center" th:if="${booking.status.name() == 'CONFIRMED'}">
-                    <a th:href="@{'/verify/' + ${booking.bookingReference}}" target="_blank" class="text-decoration-none" title="Click to verify pass online">
-                        <div class="p-2 bg-white rounded-2 mb-2 shadow-sm d-inline-block">
-                            <i class="fa-solid fa-qrcode text-dark" style="display: block; font-size: 3.5rem;"></i>
-                        </div>
-                        <div class="small fw-bold text-white" style="font-size: 0.75rem;">VERIFY PASS</div>
-                        <div class="text-accent fw-mono small" th:text="${booking.bookingReference}">CP-928410</div>
-                    </a>
-                </div>
-
-                <!-- QR Section (Cancelled / Expired) -->
-                <div class="ticket-qr-section text-muted text-center" th:if="${booking.status.name() != 'CONFIRMED'}">
-                    <i class="fa-solid fa-ban fs-2 text-secondary mb-2"></i>
-                    <div class="small fw-semibold text-secondary" th:text="${booking.status}">CANCELLED</div>
-                    <div class="small" style="font-size: 0.68rem;">Inactive</div>
-                </div>
-            </div>
-
+            </article>
         </div>
     </main>
 

@@ -6,134 +6,66 @@
     <!-- Shared Navigation Bar -->
     <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-    <main class="container px-lg-5 my-5 flex-grow-1">
-        <div class="row justify-content-center">
-            <div class="col-md-8 col-lg-6">
+    <main class="flex-grow-1 py-4 py-lg-5">
+        <div class="container-xl" style="max-width: 640px;">
 
-                <!-- VALID TICKET PASS -->
-                <div th:if="${valid}" class="card border-0 shadow-lg text-white"
-                     style="background: var(--bg-surface); border-radius: 18px; overflow: hidden; border: 1px solid var(--border-subtle) !important;">
-                    
-                    <!-- Verification Header Banner -->
-                    <div class="p-4 text-center"
-                         th:style="${reservation.status == T(com.example.moviereservation.entity.ReservationStatus).CONFIRMED ? 'background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 78, 59, 0.4)); border-bottom: 1px solid rgba(16, 185, 129, 0.4);' : 'background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(127, 29, 29, 0.4)); border-bottom: 1px solid rgba(239, 68, 68, 0.4);'}">
-                        
-                        <div class="mb-2" th:if="${reservation.status == T(com.example.moviereservation.entity.ReservationStatus).CONFIRMED}">
-                            <i class="fa-solid fa-circle-check fs-1 text-success"></i>
-                        </div>
-                        <div class="mb-2" th:unless="${reservation.status == T(com.example.moviereservation.entity.ReservationStatus).CONFIRMED}">
-                            <i class="fa-solid fa-circle-exclamation fs-1 text-warning"></i>
-                        </div>
-
-                        <span th:if="${reservation.status == T(com.example.moviereservation.entity.ReservationStatus).CONFIRMED}"
-                              class="badge bg-success fs-6 px-3 py-2 rounded-pill">
-                            <i class="fa-solid fa-shield-halved me-1"></i> VERIFIED CONFIRMED PASS
-                        </span>
-                        <span th:if="${reservation.status == T(com.example.moviereservation.entity.ReservationStatus).PENDING}"
-                              class="badge bg-warning text-dark fs-6 px-3 py-2 rounded-pill">
-                            <i class="fa-solid fa-clock me-1"></i> PAYMENT PENDING
-                        </span>
-                        <span th:if="${reservation.status == T(com.example.moviereservation.entity.ReservationStatus).CANCELLED}"
-                              class="badge bg-danger fs-6 px-3 py-2 rounded-pill">
-                            <i class="fa-solid fa-ban me-1"></i> CANCELLED TICKET
-                        </span>
-                        <span th:if="${reservation.status == T(com.example.moviereservation.entity.ReservationStatus).EXPIRED}"
-                              class="badge bg-secondary fs-6 px-3 py-2 rounded-pill">
-                            <i class="fa-solid fa-hourglass-end me-1"></i> EXPIRED HOLD
-                        </span>
-
-                        <h3 class="fw-bold tracking-wider mt-3 mb-1 font-monospace" th:text="${reservation.bookingReference}">CP-8392AB</h3>
-                        <div class="small text-secondary-subtle">Digital Gate Scanner Verification</div>
-                    </div>
-
-                    <!-- Pass Metadata Body -->
-                    <div class="p-4">
-                        <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom" style="border-color: var(--border-subtle) !important;">
-                            <img th:src="${reservation.showtime.movie.posterUrl}" th:alt="${reservation.showtime.movie.title}"
-                                 class="rounded-3 shadow-sm" style="width: 70px; height: 100px; object-fit: cover;">
-                            <div>
-                                <h4 class="fw-bold text-white mb-1" th:text="${reservation.showtime.movie.title}">Movie Title</h4>
-                                <div class="text-secondary-subtle small">
-                                    <i class="fa-solid fa-location-dot text-accent me-1"></i>
-                                    <span th:text="${reservation.showtime.screen.theater.name} + ' (' + ${reservation.showtime.screen.theater.city} + ')'">PVR ICON</span>
-                                </div>
-                                <div class="text-secondary-subtle small mt-1">
-                                    <span class="badge bg-danger-subtle text-danger border border-danger" th:text="'Screen ' + ${reservation.showtime.screen.screenNumber}">Screen 1</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Showtime & Seats Details Grid -->
-                        <div class="row g-3 mb-4">
-                            <div class="col-6">
-                                <div class="p-3 rounded-3" style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-subtle);">
-                                    <div class="text-secondary-subtle small mb-1"><i class="fa-regular fa-calendar me-1"></i> Showtime</div>
-                                    <div class="fw-bold text-white" th:text="${#temporals.format(reservation.showtime.startTime, 'dd MMM yyyy, hh:mm a')}">14 Sep, 08:30 PM</div>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="p-3 rounded-3" style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-subtle);">
-                                    <div class="text-secondary-subtle small mb-1"><i class="fa-solid fa-chair me-1"></i> Allocated Seats</div>
-                                    <div class="fw-bold text-white">
-                                        <span th:text="${reservation.seatSummary}">A1, A2</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="p-3 rounded-3" style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-subtle);">
-                                    <div class="text-secondary-subtle small mb-1"><i class="fa-solid fa-user me-1"></i> Primary Guest</div>
-                                    <div class="fw-bold text-white" th:text="${guestName}">Rahul S.</div>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="p-3 rounded-3" style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-subtle);">
-                                    <div class="text-secondary-subtle small mb-1"><i class="fa-solid fa-indian-rupee-sign me-1"></i> Total Paid</div>
-                                    <div class="fw-bold text-accent fs-5" th:text="'₹' + ${reservation.totalAmount}">₹750</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Verification Footer Stamp -->
-                        <div class="text-center pt-3 border-top" style="border-color: var(--border-subtle) !important;">
-                            <div class="small text-secondary-subtle mb-3">
-                                <i class="fa-solid fa-clock me-1"></i> Scanned At: 
-                                <span th:text="${#temporals.format(verifiedAt, 'dd MMM yyyy, hh:mm:ss a')}">Now</span>
-                            </div>
-                            <div class="d-flex gap-2 justify-content-center">
-                                <a th:if="${reservation.status == T(com.example.moviereservation.entity.ReservationStatus).CONFIRMED}"
-                                   th:href="@{'/reservations/' + ${reservation.id} + '/ticket'}" class="btn btn-outline-custom btn-sm">
-                                    <i class="fa-solid fa-file-arrow-down me-1"></i> Download Ticket PDF
-                                </a>
-                                <a th:href="@{/}" class="btn btn-accent btn-sm">
-                                    <i class="fa-solid fa-house me-1"></i> Back to CinePass
-                                </a>
-                            </div>
-                        </div>
-                    </div>
+            <!-- Valid reference -->
+            <article th:if="${valid}" class="ticket-card" th:with="st=${reservation.status.name()}">
+                <div class="p-4 text-center border-bottom"
+                     th:classappend="${st == 'CONFIRMED' ? 'bg-success-subtle' : (st == 'PENDING' ? 'bg-warning-subtle' : 'bg-body-tertiary')}">
+                    <div class="fw-bold fs-5"
+                         th:classappend="${st == 'CONFIRMED' ? 'text-success' : (st == 'PENDING' ? 'text-warning-emphasis' : 'text-body-secondary')}"
+                         th:text="${st == 'CONFIRMED' ? 'Valid ticket' : (st == 'PENDING' ? 'Payment pending: not valid for entry' : (st == 'CANCELLED' ? 'Cancelled: not valid for entry' : 'Expired: not valid for entry'))}">Valid ticket</div>
+                    <div class="font-monospace fw-semibold mt-1" th:text="${reservation.bookingReference}">CP-8392AB</div>
                 </div>
 
-                <!-- INVALID TICKET NOT FOUND -->
-                <div th:unless="${valid}" class="card border-0 shadow-lg text-white text-center p-5"
-                     style="background: var(--bg-surface); border-radius: 18px; border: 1px solid rgba(239, 68, 68, 0.3) !important;">
-                    <div class="mb-3">
-                        <i class="fa-solid fa-triangle-exclamation text-danger fs-1"></i>
+                <div class="p-4">
+                    <div class="d-flex gap-3 mb-4">
+                        <img th:src="${reservation.showtime.movie.posterUrl}" th:alt="${reservation.showtime.movie.title} + ' poster'"
+                             class="rounded-2 flex-shrink-0" style="width: 72px; aspect-ratio: 2/3; object-fit: cover;">
+                        <div>
+                            <h1 class="fs-5 mb-1" th:text="${reservation.showtime.movie.title}">Movie title</h1>
+                            <div class="text-body-secondary small" th:text="${reservation.showtime.screen.theater.name} + ', ' + ${reservation.showtime.screen.theater.city} + ' · Screen ' + ${reservation.showtime.screen.screenNumber}">Theater, City · Screen 1</div>
+                        </div>
                     </div>
-                    <h3 class="fw-bold text-white mb-2">Invalid Booking Pass</h3>
-                    <p class="text-secondary-subtle mb-4">
-                        The scanned booking reference <strong class="text-danger font-monospace" th:text="${bookingReference}">INVALID-REF</strong> 
-                        could not be verified against the CinePass database.
-                    </p>
-                    <div class="alert alert-danger d-inline-block text-start border-0 py-2 px-3 small" style="background: rgba(239, 68, 68, 0.15); color: #fca5a5;">
-                        <i class="fa-solid fa-circle-info me-1"></i> Ensure you have scanned an official QR code from your booking confirmation email or downloaded PDF pass.
+
+                    <div class="row g-3 small">
+                        <div class="col-6">
+                            <div class="text-body-secondary">Show</div>
+                            <div class="fw-semibold" th:text="${#temporals.format(reservation.showtime.startTime, 'EEE, dd MMM yyyy · hh:mm a')}">Wed, 25 Nov 2026 · 08:30 PM</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-body-secondary">Seats</div>
+                            <div class="fw-semibold" th:text="${reservation.seatSummary}">A1, A2</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-body-secondary">Booked by</div>
+                            <div class="fw-semibold" th:text="${guestName}">Rahul S.</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-body-secondary">Amount</div>
+                            <div class="fw-semibold" th:text="'₹' + ${#numbers.formatDecimal(reservation.totalAmount, 1, 'COMMA', 2, 'POINT')}">₹750.00</div>
+                        </div>
                     </div>
-                    <div class="mt-4">
-                        <a th:href="@{/}" class="btn btn-accent px-4 py-2">
-                            <i class="fa-solid fa-house me-2"></i> Return to Homepage
-                        </a>
+
+                    <hr>
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                        <span class="text-body-secondary small" th:text="'Checked ' + ${#temporals.format(verifiedAt, 'dd MMM yyyy, hh:mm a')}">Checked now</span>
+                        <a th:if="${st == 'CONFIRMED'}" th:href="@{'/reservations/' + ${reservation.id} + '/ticket'}" class="btn btn-outline-custom btn-sm">Download ticket (PDF)</a>
                     </div>
                 </div>
+            </article>
 
+            <!-- Unknown reference -->
+            <div th:unless="${valid}" class="theater-card text-center py-5">
+                <h1 class="fs-4 mb-2">Ticket not found</h1>
+                <p class="text-body-secondary mb-4">
+                    No booking matches <span class="font-monospace fw-semibold text-body" th:text="${bookingReference}">INVALID-REF</span>.
+                    Scan the QR code from your ticket PDF or confirmation email.
+                </p>
+                <a th:href="@{/}" class="btn btn-accent px-4">Go to home</a>
             </div>
+
         </div>
     </main>
 

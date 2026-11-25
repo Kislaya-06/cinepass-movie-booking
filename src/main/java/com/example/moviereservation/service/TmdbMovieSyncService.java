@@ -113,17 +113,20 @@ public class TmdbMovieSyncService {
                 .defaultHeader("Accept", "application/json")
                 .build();
 
-        String jsonResponse;
+        // Now playing fills "Now showing"; upcoming fills "Coming soon" on the home page
+        List<String> responses = new ArrayList<>();
         try {
-            jsonResponse = client.get()
-                    .uri(uriBuilder -> uriBuilder
-                            .path("/movie/now_playing")
-                            .queryParam("api_key", activeKey)
-                            .queryParam("language", "en-US")
-                            .queryParam("page", 1)
-                            .build())
-                    .retrieve()
-                    .body(String.class);
+            for (String path : List.of("/movie/now_playing", "/movie/upcoming")) {
+                responses.add(client.get()
+                        .uri(uriBuilder -> uriBuilder
+                                .path(path)
+                                .queryParam("api_key", activeKey)
+                                .queryParam("language", "en-US")
+                                .queryParam("page", 1)
+                                .build())
+                        .retrieve()
+                        .body(String.class));
+            }
         } catch (Exception e) {
             log.error("Failed to connect to TMDb API: {}", e.getMessage(), e);
             // e.getMessage() can contain the request URL with ?api_key=..., so keep it out of the UI
@@ -137,6 +140,7 @@ public class TmdbMovieSyncService {
         List<Screen> availableScreens = screenRepository.findAll();
 
         try {
+            for (String jsonResponse : responses) {
             JsonNode root = objectMapper.readTree(jsonResponse);
             JsonNode results = root.path("results");
 
@@ -177,7 +181,8 @@ public class TmdbMovieSyncService {
                     }
 
                     String langCode = item.path("original_language").asText("en").toLowerCase();
-                    String language = LANGUAGE_MAP.getOrDefault(langCode, langCode.toUpperCase());
+                    String langName = java.util.Locale.forLanguageTag(langCode).getDisplayLanguage(java.util.Locale.ENGLISH);
+                    String language = LANGUAGE_MAP.getOrDefault(langCode, langName.isEmpty() ? langCode.toUpperCase() : langName);
 
                     List<String> genresList = new ArrayList<>();
                     JsonNode genreIds = item.path("genre_ids");
@@ -208,11 +213,12 @@ public class TmdbMovieSyncService {
                     Movie saved = movieRepository.save(movie);
                     imported++;
 
-                    // Auto-schedule sample shows if requested
-                    if (autoScheduleShows && !availableScreens.isEmpty()) {
+                    // Auto-schedule sample shows if requested; unreleased films get none
+                    if (autoScheduleShows && !availableScreens.isEmpty() && !releaseDate.isAfter(LocalDate.now())) {
                         showtimesAdded += scheduleSampleShowtimes(saved, availableScreens, imported);
                     }
                 }
+            }
             }
         } catch (Exception e) {
             log.error("Error processing TMDb JSON response", e);

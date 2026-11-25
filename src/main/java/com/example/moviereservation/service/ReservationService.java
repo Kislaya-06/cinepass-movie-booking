@@ -197,6 +197,10 @@ public class ReservationService {
             throw new ApplicationException("Cannot cancel an already expired reservation");
         }
 
+        if (!reservation.getShowtime().getStartTime().isAfter(LocalDateTime.now())) {
+            throw new ApplicationException("This show has already started, so the booking can no longer be cancelled.");
+        }
+
         reservation.setStatus(ReservationStatus.CANCELLED);
         // Release held seats so uk_showtime_seat constraint unblocks future bookings for this showtime
         reservation.getReservationSeats().clear();

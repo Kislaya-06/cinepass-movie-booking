@@ -33,6 +33,10 @@ public class ReservationController {
     private final ReservationService reservationService;
     private final TicketPdfService ticketPdfService;
     private final EmailService emailService;
+    private final com.example.moviereservation.service.QrCodeService qrCodeService;
+
+    @org.springframework.beans.factory.annotation.Value("${app.server.base-url}")
+    private String baseUrl;
 
     @PostMapping("/reservations")
     public String createReservation(
@@ -102,6 +106,9 @@ public class ReservationController {
         if (reservation == null) {
             throw new UnauthorizedActionException("You are not authorized to download this ticket pass.");
         }
+        if (reservation.getStatus() != ReservationStatus.CONFIRMED) {
+            throw new ApplicationException("A ticket is only issued for a confirmed booking.");
+        }
 
         byte[] pdfBytes = ticketPdfService.generateTicketPdf(reservation);
         String filename = "CinePass-Ticket-" + reservation.getBookingReference() + ".pdf";
@@ -110,6 +117,20 @@ public class ReservationController {
                 .contentType(MediaType.APPLICATION_PDF)
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
                 .body(pdfBytes);
+    }
+
+    /** Entry QR shown on the booking-confirmed page; same owner check as the PDF. */
+    @GetMapping(value = "/reservations/{id}/qr.png", produces = MediaType.IMAGE_PNG_VALUE)
+    public ResponseEntity<byte[]> ticketQr(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        Reservation reservation = reservationService.getReservationByIdAndUser(id, userDetails.getId());
+        if (reservation == null || reservation.getStatus() != ReservationStatus.CONFIRMED) {
+            throw new UnauthorizedActionException("No ticket QR for this booking.");
+        }
+        byte[] png = qrCodeService.generateQrCode(baseUrl + "/verify/" + reservation.getBookingReference(), 280, 280);
+        return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(png);
     }
 
     @GetMapping("/reservations/{id}/success")

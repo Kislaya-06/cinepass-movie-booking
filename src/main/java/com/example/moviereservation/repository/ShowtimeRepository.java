@@ -10,7 +10,7 @@ import java.util.List;
 @Repository
 public interface ShowtimeRepository extends JpaRepository<Showtime, Long> {
 
-    List<Showtime> findByMovieIdAndStartTimeAfter(Long movieId, LocalDateTime time);
+    List<Showtime> findByMovieIdAndStartTimeAfterOrderByStartTimeAsc(Long movieId, LocalDateTime time);
 
     boolean existsByStartTimeBetween(LocalDateTime from, LocalDateTime to);
 }

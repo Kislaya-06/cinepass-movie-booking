@@ -4,8 +4,6 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     initSeatSelection();
-    initDateSelector();
-    initShowtimeSelection();
     initFilterPills();
     initScrollButtons();
     initCountdownTimer();
@@ -39,100 +37,83 @@ function initConfirmForms() {
 
 // 1. Seat Selection Logic
 function initSeatSelection() {
-    const seatButtons = document.querySelectorAll('.seat-btn:not(.booked)');
+    const seatButtons = [...document.querySelectorAll('.seat-btn:not(.booked)')];
     const selectedCountEl = document.getElementById('selectedSeatCount');
     const selectedSeatsListEl = document.getElementById('selectedSeatsList');
     const totalPriceEl = document.getElementById('totalPrice');
     const proceedBtn = document.getElementById('proceedToPayBtn');
     const hiddenInputsContainer = document.getElementById('hiddenSeatInputs');
+    const countModalEl = document.getElementById('seatCountModal');
+    const ticketLabel = document.getElementById('ticketCountLabel');
 
-    if (!seatButtons.length || !selectedCountEl) return;
+    if (!selectedCountEl) return;
 
-    let selectedSeats = [];
+    // How many seats the user wants; picked in the "How many seats?" popup
+    let wanted = 2;
+    let selected = [];
 
+    if (countModalEl) {
+        countModalEl.querySelectorAll('.seat-count-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                countModalEl.querySelectorAll('.seat-count-btn').forEach(b => {
+                    b.classList.toggle('active', b === btn);
+                    b.setAttribute('aria-checked', b === btn);
+                });
+                wanted = parseInt(btn.dataset.count, 10);
+                ticketLabel.textContent = wanted + (wanted === 1 ? ' Ticket' : ' Tickets');
+                clearSelection();
+            });
+        });
+        if (seatButtons.length) bootstrap.Modal.getOrCreateInstance(countModalEl).show();
+    }
+
+    function clearSelection() {
+        selected.forEach(b => b.classList.remove('selected'));
+        selected = [];
+        updateSummary();
+    }
+
+    // Like ticketing apps: one tap fills the free seats to the right of it, up to the count left
     seatButtons.forEach(btn => {
         btn.addEventListener('click', () => {
-            const seatDbId = btn.getAttribute('data-seat-id');
-            const seatLabel = btn.getAttribute('data-seat-label') || seatDbId;
-            const price = parseInt(btn.getAttribute('data-price') || '250', 10);
-
-            if (btn.classList.contains('selected')) {
-                btn.classList.remove('selected');
-                selectedSeats = selectedSeats.filter(s => s.id !== seatDbId);
-            } else {
-                // Limit to 10 seats per booking
-                if (selectedSeats.length >= 10) {
-                    alert('You can select a maximum of 10 seats per transaction.');
-                    return;
-                }
-                btn.classList.add('selected');
-                selectedSeats.push({ id: seatDbId, label: seatLabel, price: price });
+            if (btn.classList.contains('selected') || selected.length >= wanted) clearSelection();
+            const rowSeats = [...btn.closest('.seat-row').querySelectorAll('.seat-btn')];
+            for (let i = rowSeats.indexOf(btn); i < rowSeats.length && selected.length < wanted; i++) {
+                const seat = rowSeats[i];
+                if (seat.classList.contains('booked') || seat.classList.contains('selected')) break;
+                seat.classList.add('selected');
+                selected.push(seat);
             }
-
             updateSummary();
         });
     });
 
     function updateSummary() {
-        const count = selectedSeats.length;
+        const count = selected.length;
         selectedCountEl.textContent = count;
-
-        if (hiddenInputsContainer) {
-            hiddenInputsContainer.innerHTML = '';
-        }
+        hiddenInputsContainer.innerHTML = '';
 
         if (count === 0) {
-            selectedSeatsListEl.textContent = 'None selected';
+            selectedSeatsListEl.textContent = 'Tap a seat to start';
             totalPriceEl.textContent = '₹0';
-            if (proceedBtn) {
-                proceedBtn.disabled = true;
-                proceedBtn.classList.add('opacity-50');
-            }
         } else {
-            const labels = selectedSeats.map(s => s.label).join(', ');
-            selectedSeatsListEl.textContent = labels;
-
-            const total = selectedSeats.reduce((acc, curr) => acc + curr.price, 0);
-            totalPriceEl.textContent = `₹${total}`;
-
-            if (hiddenInputsContainer) {
-                selectedSeats.forEach(s => {
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = 'seatIds';
-                    input.value = s.id;
-                    hiddenInputsContainer.appendChild(input);
-                });
-            }
-
-            if (proceedBtn) {
-                proceedBtn.disabled = false;
-                proceedBtn.classList.remove('opacity-50');
-            }
+            selectedSeatsListEl.textContent = selected.map(s => s.dataset.seatLabel).join(', ')
+                + (count < wanted ? ` (pick ${wanted - count} more)` : '');
+            const total = selected.reduce((sum, s) => sum + parseInt(s.dataset.price, 10), 0);
+            totalPriceEl.textContent = `₹${total.toLocaleString('en-IN')}`;
+            selected.forEach(s => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'seatIds';
+                input.value = s.dataset.seatId;
+                hiddenInputsContainer.appendChild(input);
+            });
         }
+        // Pay only once the chosen number of seats is picked
+        const ready = count > 0 && count === wanted;
+        proceedBtn.disabled = !ready;
+        proceedBtn.classList.toggle('opacity-50', !ready);
     }
-}
-
-// 2. Date Selector Pill Logic
-function initDateSelector() {
-    const datePills = document.querySelectorAll('.date-pill');
-    datePills.forEach(pill => {
-        pill.addEventListener('click', () => {
-            datePills.forEach(p => p.classList.remove('active'));
-            pill.classList.add('active');
-        });
-    });
-}
-
-// 3. Showtime Pill Logic
-function initShowtimeSelection() {
-    const showtimePills = document.querySelectorAll('.showtime-pill');
-    showtimePills.forEach(pill => {
-        pill.addEventListener('click', () => {
-            showtimePills.forEach(p => p.classList.remove('active-showtime'));
-            pill.classList.add('active-showtime');
-        });
-    });
 }
 
 // 4. Category Filter Pills Logic
@@ -230,3 +211,28 @@ function initLoadingStates() {
         });
     });
 }
+
+// Showtimes page: filter pills by time of day
+(function initTimeFilter() {
+    const group = document.getElementById('timeFilter');
+    if (!group) return;
+    const slotOf = h => h < 12 ? 'morning' : h < 16 ? 'afternoon' : h < 20 ? 'evening' : 'night';
+    group.addEventListener('click', e => {
+        const btn = e.target.closest('[data-slot]');
+        if (!btn) return;
+        group.querySelectorAll('[data-slot]').forEach(b => b.classList.toggle('active', b === btn));
+        const slot = btn.dataset.slot;
+        let anyVisible = false;
+        document.querySelectorAll('.theater-row').forEach(row => {
+            let rowVisible = false;
+            row.querySelectorAll('.showtime-pill').forEach(pill => {
+                const show = slot === 'all' || slotOf(parseInt(pill.dataset.hour, 10)) === slot;
+                pill.classList.toggle('d-none', !show);
+                rowVisible = rowVisible || show;
+            });
+            row.classList.toggle('d-none', !rowVisible);
+            anyVisible = anyVisible || rowVisible;
+        });
+        document.getElementById('noSlotShows').classList.toggle('d-none', anyVisible);
+    });
+})();

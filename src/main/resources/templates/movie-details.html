@@ -7,134 +7,65 @@
     <div th:replace="~{fragments/navbar :: navbar}"></div>
 
     <main class="flex-grow-1">
-        <!-- Movie Banner Backdrop Header -->
-        <div class="movie-banner-backdrop">
-            <div class="container px-lg-5">
+        <!-- Film header -->
+        <section class="movie-banner-backdrop py-4 py-lg-5" th:style="${movie.posterUrl != null} ? '--banner-img: url(' + ${movie.posterUrl} + ')' : null">
+            <div class="container-xl">
                 <div class="row align-items-center g-4">
-                    <!-- Poster Column -->
-                    <div class="col-lg-3 col-md-4 text-center text-md-start">
-                        <div class="detail-poster-wrap d-inline-block">
-                            <img th:src="${movie.posterUrl}" th:alt="${movie.title}" style="max-height: 420px; width: auto; object-fit: cover;"
+                    <div class="col-5 col-sm-4 col-lg-3">
+                        <div class="detail-poster-wrap">
+                            <img th:src="${movie.posterUrl}" th:alt="${movie.title} + ' poster'"
                                  onerror="this.src='https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=600&auto=format&fit=crop'">
                         </div>
                     </div>
-
-                    <!-- Details Column -->
-                    <div class="col-lg-9 col-md-8">
-                        <div class="d-flex align-items-center gap-2 mb-2">
-                            <span class="badge bg-danger">UA 16+</span>
-                            <span class="movie-meta-tag"><i class="fa-solid fa-volume-high text-accent me-1"></i> <span th:text="${movie.language}">English</span></span>
-                        </div>
-                        <h1 class="display-4 fw-bold text-white mb-2" th:text="${movie.title}">Dune: Part Two</h1>
-                        
-                        <!-- Rating Card -->
-                        <div class="d-inline-flex align-items-center gap-3 p-2 px-3 rounded-3 mb-3" style="background: var(--bg-surface); border: 1px solid var(--border-subtle);">
-                            <div class="d-flex align-items-center gap-2 text-gold fs-5 fw-bold" th:if="${movie.rating != null}">
-                                <i class="fa-solid fa-star"></i> <span th:text="${#numbers.formatDecimal(movie.rating, 1, 1) + '/10'}">9.2/10</span>
-                            </div>
-                            <div class="border-start ps-3" style="border-color: var(--border-subtle) !important;">
-                                <div class="text-white fw-semibold small">Verified Audience Rating</div>
-                                <div class="text-secondary-subtle small" style="font-size: 0.75rem;">Bookings trending high</div>
-                            </div>
-                        </div>
-
-                        <!-- Formats & Meta -->
+                    <div class="col-12 col-sm-8 col-lg-9">
+                        <h1 class="display-6 mb-3" th:text="${movie.title}">Movie title</h1>
                         <div class="d-flex flex-wrap gap-2 mb-3">
-                            <span class="movie-meta-tag"><i class="fa-regular fa-clock me-1 text-accent"></i> <span th:text="${movie.durationInMinutes + 'm'}">166m</span></span>
-                            <span class="movie-meta-tag" th:text="${movie.genre}">Sci-Fi, Adventure</span>
-                            <span class="movie-meta-tag" th:if="${movie.releaseDate != null}" th:text="'Released ' + ${#temporals.format(movie.releaseDate, 'dd MMM, yyyy')}">Released 01 Mar, 2024</span>
-                        </div>
-
-                        <div class="mt-4">
-                            <a href="#showtimeSection" class="btn btn-accent btn-lg px-4">
-                                <i class="fa-solid fa-ticket me-1"></i> Check Theaters & Showtimes
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="container px-lg-5 py-5">
-            <div class="row g-4 g-lg-5">
-                <!-- Main Content (Showtimes & Theaters) -->
-                <div class="col-lg-8" id="showtimeSection">
-                    
-                    <div class="section-header d-flex justify-content-between align-items-center mb-3">
-                        <h3 class="section-title fs-5 mb-0">
-                            <i class="fa-solid fa-calendar-check text-accent"></i> 
-                            Theaters in <span class="text-accent" th:text="${selectedCity}">Mumbai</span>
-                        </h3>
-                        <button class="btn btn-sm btn-outline-custom" type="button" data-bs-toggle="modal" data-bs-target="#citySelectModal">
-                            <i class="fa-solid fa-location-dot text-accent me-1"></i> Change City
-                        </button>
-                    </div>
-
-                    <!-- If no showtimes available -->
-                    <div th:if="${groupedShowtimes == null or groupedShowtimes.isEmpty()}" class="p-5 text-center rounded-3 mb-4" style="background: var(--bg-surface); border: 1px dashed var(--border-subtle);">
-                        <i class="fa-regular fa-calendar-xmark text-secondary mb-3" style="font-size: 2.5rem;"></i>
-                        <h5 class="text-white fw-bold">No Active Theaters in <span class="text-accent" th:text="${selectedCity}">Selected City</span></h5>
-                        <p class="text-secondary-subtle mb-3">There are no upcoming scheduled screenings for this film in <strong class="text-white" th:text="${selectedCity}">City</strong> right now. Try switching to another city or check other movies.</p>
-                        <div class="d-flex justify-content-center gap-2">
-                            <button type="button" class="btn btn-accent btn-sm" data-bs-toggle="modal" data-bs-target="#citySelectModal">
-                                <i class="fa-solid fa-location-dot me-1"></i> Change City
-                            </button>
-                            <a th:href="@{/}" class="btn btn-outline-custom btn-sm"><i class="fa-solid fa-arrow-left me-1"></i> Explore Other Movies</a>
-                        </div>
-                    </div>
-
-                    <!-- Iterate by Date -->
-                    <div th:each="dateEntry : ${groupedShowtimes}" class="mb-5">
-                        <div class="d-flex align-items-center gap-2 mb-3">
-                            <span class="badge bg-accent text-white px-3 py-2 fw-semibold" style="font-size: 0.9rem;">
-                                <i class="fa-regular fa-calendar me-1"></i>
-                                <span th:text="${#temporals.format(dateEntry.key, 'EEEE, dd MMMM yyyy')}">Monday, 09 September 2026</span>
+                            <span class="movie-meta-tag" th:if="${movie.rating != null}">
+                                <i class="fa-solid fa-star text-gold" aria-hidden="true"></i><span th:text="${#numbers.formatDecimal(movie.rating, 1, 1)} + '/10'">8.0/10</span>
                             </span>
+                            <span class="movie-meta-tag" th:text="${movie.language}">English</span>
+                            <span class="movie-meta-tag" th:if="${movie.durationInMinutes != null}" th:text="${movie.durationInMinutes / 60} + 'h ' + ${movie.durationInMinutes % 60} + 'm'">2h 30m</span>
+                            <span class="movie-meta-tag" th:text="${movie.genre}">Genre</span>
+                            <span class="movie-meta-tag" th:if="${movie.releaseDate != null}" th:text="${#temporals.format(movie.releaseDate, 'dd MMM yyyy')}">01 Mar 2026</span>
                         </div>
-
-                        <!-- Iterate by Theater within Date -->
-                        <div th:each="theaterEntry : ${dateEntry.value}" class="theater-card mb-4">
-                            <div class="theater-header">
-                                <div>
-                                    <h5 class="fw-bold text-white mb-1">
-                                        <i class="fa-solid fa-location-dot text-accent me-2" style="font-size: 0.9rem;"></i>
-                                        <span th:text="${theaterEntry.key}">PVR ICON: Phoenix Palladium</span>
-                                    </h5>
-                                    <div class="text-secondary-subtle small d-flex gap-3">
-                                        <span th:if="${!theaterEntry.value.isEmpty()}" th:text="${theaterEntry.value[0].screen.theater.location}">Lower Parel</span>
-                                        <span><i class="fa-solid fa-utensils me-1"></i> F&B Available</span>
-                                        <span><i class="fa-solid fa-wheelchair me-1"></i> Wheelchair Access</span>
-                                    </div>
-                                </div>
-                                <span class="badge bg-secondary-subtle text-white border border-subtle"
-                                      th:if="${!theaterEntry.value.isEmpty()}"
-                                      th:text="'Screen ' + ${theaterEntry.value[0].screen.screenNumber}">Screen 1</span>
-                            </div>
-
-                            <div class="showtime-pills-wrap">
-                                <a th:each="st : ${theaterEntry.value}"
-                                   th:href="@{'/showtimes/' + ${st.id} + '/seats'}"
-                                   class="showtime-pill">
-                                    <span th:text="${#temporals.format(st.startTime, 'hh:mm a')}">10:15 AM</span>
-                                    <span class="format-sub" th:text="'₹' + ${st.price}">₹250</span>
-                                </a>
-                            </div>
+                        <a th:if="${hasShows}" th:href="@{'/movies/' + ${movie.id} + '/buytickets'}" class="btn btn-accent btn-lg px-5">Book tickets</a>
+                        <div th:unless="${hasShows}">
+                            <span class="btn btn-light btn-lg px-5 disabled" aria-disabled="true" th:text="${comingSoon} ? 'Releasing ' + ${#temporals.format(movie.releaseDate, 'dd MMM yyyy')} : 'No shows in ' + ${selectedCity}">No shows</span>
+                            <button type="button" class="btn btn-link text-white" th:if="${!comingSoon}" data-bs-toggle="modal" data-bs-target="#citySelectModal">Change city</button>
                         </div>
-                    </div>
-
-                </div>
-
-                <!-- Sidebar Content (About & Synopsis) -->
-                <div class="col-lg-4">
-                    <!-- About Movie -->
-                    <div class="p-4 rounded-3 mb-4" style="background: var(--bg-surface); border: 1px solid var(--border-subtle);">
-                        <h4 class="fw-bold text-white mb-3">About The Movie</h4>
-                        <p class="text-secondary-subtle small lh-lg mb-0" th:text="${movie.description}">
-                            A mythic and emotionally charged hero's journey.
-                        </p>
                     </div>
                 </div>
             </div>
+        </section>
+
+        <div class="container-xl py-4 py-lg-5">
+            <section class="mb-5" style="max-width: 760px;">
+                <h2 class="section-title fs-4 mb-2">About the movie</h2>
+                <p class="text-body-secondary mb-0" th:text="${movie.description}">Description</p>
+            </section>
+
+            <section th:unless="${similarMovies.isEmpty()}">
+                <div class="section-header">
+                    <h2 class="section-title fs-4">You might also like</h2>
+                </div>
+                <div class="movie-scroll-row">
+                    <div class="movie-card" th:each="m : ${similarMovies}">
+                        <a th:href="@{'/movies/' + ${m.id}}">
+                            <div class="movie-poster-wrap">
+                                <img th:src="${m.posterUrl}" th:alt="${m.title} + ' poster'" class="movie-poster-img" loading="lazy"
+                                     onerror="this.src='https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=600&auto=format&fit=crop'">
+                                <div class="movie-rating-badge" th:if="${m.rating != null}">
+                                    <i class="fa-solid fa-star text-gold me-1" aria-hidden="true"></i><span th:text="${#numbers.formatDecimal(m.rating, 1, 1)} + '/10'">8.0/10</span>
+                                </div>
+                            </div>
+                            <div class="movie-card-body">
+                                <div class="movie-title" th:text="${m.title}" th:title="${m.title}">Movie title</div>
+                                <div class="movie-genres" th:text="${m.genre}">Genre</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </section>
         </div>
     </main>
 

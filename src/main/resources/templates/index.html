@@ -3,135 +3,86 @@
 <head th:replace="~{fragments/head :: head('CinePass - Book Movie Tickets Online')}"></head>
 <body>
 
-    <!-- Shared Navigation Bar -->
     <div th:replace="~{fragments/navbar :: navbar}"></div>
 
     <main class="flex-grow-1 py-4">
-        <div class="container-fluid px-lg-5">
+        <div class="container-xl">
 
-            <!-- Hero Banner -->
-            <div class="hero-banner" th:if="${featuredMovie != null}">
+            <!-- Featured film -->
+            <section class="hero-banner mb-4" th:if="${featuredMovie != null}">
                 <div class="hero-backdrop" th:style="'background-image: url(' + ${featuredMovie.posterUrl} + ');'"></div>
                 <div class="hero-content">
-                    <span class="hero-badge">
-                        <i class="fa-solid fa-fire me-1"></i> Blockbuster of the Month
-                    </span>
-                    <h1 class="display-5 fw-bold text-white mb-2" th:text="${featuredMovie.title}">Dune: Part Two</h1>
-                    <div class="d-flex align-items-center gap-3 mb-3 text-secondary-subtle small">
-                        <span class="badge bg-danger" th:text="${featuredMovie.language}">English</span>
-                        <span><i class="fa-solid fa-clock text-accent me-1"></i> <span th:text="${featuredMovie.durationInMinutes + 'm'}">166m</span></span>
-                        <span><i class="fa-solid fa-film text-accent me-1"></i> <span th:text="${featuredMovie.genre}">Sci-Fi</span></span>
-                        <span><i class="fa-solid fa-star text-gold me-1"></i> <span th:text="${featuredMovie.rating != null ? #numbers.formatDecimal(featuredMovie.rating, 1, 1) + '/10' : '9.0/10'}">9.2/10</span></span>
-                    </div>
-                    <p class="text-secondary-subtle mb-4" th:text="${featuredMovie.description}">
-                        Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family.
+                    <span class="hero-badge">Featured</span>
+                    <h1 class="display-6 mb-2" th:text="${featuredMovie.title}">Movie title</h1>
+                    <p class="text-body-secondary small mb-3">
+                        <span th:text="${featuredMovie.language}">English</span>
+                        <span th:if="${featuredMovie.durationInMinutes != null}" th:text="' · ' + ${featuredMovie.durationInMinutes / 60} + 'h ' + ${featuredMovie.durationInMinutes % 60} + 'm'"> · 2h 30m</span>
+                        <span th:text="' · ' + ${featuredMovie.genre}"> · Genre</span>
+                        <span th:if="${featuredMovie.rating != null}" th:text="' · ★ ' + ${#numbers.formatDecimal(featuredMovie.rating, 1, 1)} + '/10'"> · ★ 8.0/10</span>
                     </p>
-                    <div class="d-flex flex-wrap gap-3">
-                        <a th:href="@{'/movies/' + ${featuredMovie.id}}" class="btn btn-accent px-4 py-2">
-                            <i class="fa-solid fa-ticket"></i> Book Tickets Now
-                        </a>
-                        <a th:href="@{'/movies/' + ${featuredMovie.id}}" class="btn btn-outline-custom px-4 py-2">
-                            <i class="fa-solid fa-circle-info"></i> View Details
-                        </a>
-                    </div>
+                    <div class="d-none d-md-block mb-4"><p class="text-body-secondary mb-0" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;" th:text="${featuredMovie.description}">Description</p></div>
+                    <a th:href="@{'/movies/' + ${featuredMovie.id}}" class="btn btn-accent px-4">Book tickets</a>
                 </div>
-            </div>
+            </section>
 
-            <!-- Genre Filter Pills -->
-            <div class="filter-pills-row">
-                <a th:href="@{/}" class="filter-pill" th:classappend="${activeGenre == 'all' ? 'active' : ''}"><i class="fa-solid fa-compass me-1"></i> All Movies</a>
-                <a th:href="@{/(genre='Action')}" class="filter-pill" th:classappend="${activeGenre == 'Action' ? 'active' : ''}"><i class="fa-solid fa-explosion me-1"></i> Action</a>
-                <a th:href="@{/(genre='Sci-Fi')}" class="filter-pill" th:classappend="${activeGenre == 'Sci-Fi' ? 'active' : ''}"><i class="fa-solid fa-rocket me-1"></i> Sci-Fi</a>
-                <a th:href="@{/(genre='Drama')}" class="filter-pill" th:classappend="${activeGenre == 'Drama' ? 'active' : ''}"><i class="fa-solid fa-masks-theater me-1"></i> Drama</a>
-                <a th:href="@{/(genre='Adventure')}" class="filter-pill" th:classappend="${activeGenre == 'Adventure' ? 'active' : ''}"><i class="fa-solid fa-map-location-dot me-1"></i> Adventure</a>
-                <a th:href="@{/(genre='Biography')}" class="filter-pill" th:classappend="${activeGenre == 'Biography' ? 'active' : ''}"><i class="fa-solid fa-book-open me-1"></i> Biography</a>
-            </div>
+            <!-- Genre filter -->
+            <nav class="filter-pills-row mb-4" aria-label="Filter by genre">
+                <a th:href="@{/}" class="filter-pill" th:classappend="${activeGenre == 'all' ? 'active' : ''}">All</a>
+                <a th:each="g : ${ {'Action','Sci-Fi','Drama','Comedy','Thriller','Adventure','Animation'} }"
+                   th:href="@{/(genre=${g})}" class="filter-pill" th:classappend="${activeGenre == g ? 'active' : ''}" th:text="${g}">Genre</a>
+            </nav>
 
-            <!-- SECTION 1: Now Showing (Horizontal Scrollable) -->
+            <th:block th:with="collapsed=${param.all == null and param.search == null and activeGenre == 'all' and nowShowing.size() > 10}">
+            <!-- Now showing -->
             <section class="mb-5">
                 <div class="section-header">
-                    <h2 class="section-title">
-                        <i class="fa-solid fa-circle-play"></i> Now Showing In Cinemas
-                    </h2>
-                    <div class="d-flex align-items-center gap-2">
-                        <button class="btn btn-sm btn-outline-custom scroll-btn-prev" aria-label="Scroll left">
-                            <i class="fa-solid fa-chevron-left"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-custom scroll-btn-next" aria-label="Scroll right">
-                            <i class="fa-solid fa-chevron-right"></i>
-                        </button>
-                        <a th:href="@{/}" class="btn btn-sm btn-link text-accent text-decoration-none fw-semibold ms-2">See All</a>
-                    </div>
+                    <h2 class="section-title" th:text="${param.search != null ? 'Results for &quot;' + param.search[0] + '&quot;' : 'Now showing'}">Now showing</h2>
+                    <a th:if="${collapsed}" th:href="@{/(all=true)}" class="small fw-semibold text-accent" th:text="'See all (' + ${nowShowing.size()} + ') ›'">See all ›</a>
+                    <span th:unless="${collapsed}" class="text-body-secondary small" th:text="${nowShowing.size()} + ' movies'">20 movies</span>
                 </div>
 
-                <p th:if="${nowShowing.isEmpty()}" class="text-secondary-subtle">No movies showing right now. Try another genre or search.</p>
-                <div class="movie-scroll-wrapper" th:unless="${nowShowing.isEmpty()}">
-                    <div class="movie-scroll-row">
+                <p th:if="${nowShowing.isEmpty()}" class="text-body-secondary">No movies showing right now. Try another genre or search.</p>
 
-                        <!-- Dynamic Movie Card -->
-                        <div class="movie-card" th:each="movie : ${nowShowing}">
-                            <a th:href="@{'/movies/' + ${movie.id}}">
-                                <div class="movie-poster-wrap">
-                                    <img th:src="${movie.posterUrl}" th:alt="${movie.title}" class="movie-poster-img"
-                                         onerror="this.src='https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=600&auto=format&fit=crop'">
-                                    <span class="movie-format-badge" th:text="${movie.language}">English</span>
-                                    <div class="movie-rating-badge" th:if="${movie.rating != null}">
-                                        <i class="fa-solid fa-star text-gold"></i> <span th:text="${#numbers.formatDecimal(movie.rating, 1, 1)}">9.0</span>
-                                    </div>
+                <div class="movie-grid" th:unless="${nowShowing.isEmpty()}">
+                    <div class="movie-card" th:each="movie, it : ${nowShowing}" th:if="${!collapsed or it.index < 10}">
+                        <a th:href="@{'/movies/' + ${movie.id}}">
+                            <div class="movie-poster-wrap">
+                                <img th:src="${movie.posterUrl}" th:alt="${movie.title} + ' poster'" class="movie-poster-img" loading="lazy"
+                                     onerror="this.src='https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=600&auto=format&fit=crop'">
+                                <div class="movie-rating-badge" th:if="${movie.rating != null}">
+                                    <i class="fa-solid fa-star text-gold me-1" aria-hidden="true"></i><span th:text="${#numbers.formatDecimal(movie.rating, 1, 1)} + '/10'">8.0/10</span>
                                 </div>
-                                <div class="movie-card-body">
-                                    <div class="movie-title" th:text="${movie.title}" th:title="${movie.title}">Movie Title</div>
-                                    <div class="movie-genres" th:text="${movie.genre}">Genre</div>
-                                    <div class="mt-auto">
-                                        <span class="btn btn-accent btn-sm w-100">Book Tickets</span>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-
+                            </div>
+                            <div class="movie-card-body">
+                                <div class="movie-title" th:text="${movie.title}" th:title="${movie.title}">Movie title</div>
+                                <div class="movie-genres" th:text="${movie.genre}">Genre</div>
+                            </div>
+                        </a>
                     </div>
                 </div>
             </section>
 
-            <!-- SECTION 2: Coming Soon -->
+            </th:block>
+
+            <!-- Coming soon -->
             <section class="mb-5" th:if="${comingSoon != null and !comingSoon.isEmpty()}">
                 <div class="section-header">
-                    <h2 class="section-title">
-                        <i class="fa-solid fa-calendar-days"></i> Coming Soon to Theaters
-                    </h2>
-                    <div class="d-flex align-items-center gap-2">
-                        <button class="btn btn-sm btn-outline-custom scroll-btn-prev" aria-label="Scroll left">
-                            <i class="fa-solid fa-chevron-left"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-custom scroll-btn-next" aria-label="Scroll right">
-                            <i class="fa-solid fa-chevron-right"></i>
-                        </button>
-                    </div>
+                    <h2 class="section-title">Coming soon</h2>
                 </div>
-
-                <div class="movie-scroll-wrapper">
-                    <div class="movie-scroll-row">
-                        
-                        <div class="movie-card" th:each="movie : ${comingSoon}">
-                            <a th:href="@{'/movies/' + ${movie.id}}">
-                                <div class="movie-poster-wrap">
-                                    <img th:src="${movie.posterUrl}" th:alt="${movie.title}" class="movie-poster-img"
-                                         onerror="this.src='https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=600&auto=format&fit=crop'">
-                                    <span class="movie-format-badge bg-warning text-dark" 
-                                          th:text="${movie.releaseDate != null ? #temporals.format(movie.releaseDate, 'MMM dd') : 'Soon'}">Soon</span>
-                                </div>
-                                <div class="movie-card-body">
-                                    <div class="movie-title" th:text="${movie.title}" th:title="${movie.title}">Movie Title</div>
-                                    <div class="movie-genres" th:text="${movie.genre}">Genre</div>
-                                    <div class="mt-auto">
-                                        <button class="btn btn-outline-custom btn-sm w-100">
-                                            <i class="fa-regular fa-bell me-1"></i> Details
-                                        </button>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-
+                <div class="movie-scroll-row">
+                    <div class="movie-card" th:each="movie : ${comingSoon}">
+                        <a th:href="@{'/movies/' + ${movie.id}}">
+                            <div class="movie-poster-wrap">
+                                <img th:src="${movie.posterUrl}" th:alt="${movie.title} + ' poster'" class="movie-poster-img" loading="lazy"
+                                     onerror="this.src='https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=600&auto=format&fit=crop'">
+                                <div class="movie-rating-badge" th:if="${movie.releaseDate != null}"
+                                     th:text="'Releases ' + ${#temporals.format(movie.releaseDate, 'dd MMM')}">Releases 12 Dec</div>
+                            </div>
+                            <div class="movie-card-body">
+                                <div class="movie-title" th:text="${movie.title}" th:title="${movie.title}">Movie title</div>
+                                <div class="movie-genres" th:text="${movie.genre}">Genre</div>
+                            </div>
+                        </a>
                     </div>
                 </div>
             </section>
@@ -139,7 +90,6 @@
         </div>
     </main>
 
-    <!-- Shared Footer -->
     <div th:replace="~{fragments/footer :: footer}"></div>
 
 </body>

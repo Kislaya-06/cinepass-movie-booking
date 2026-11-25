@@ -43,12 +43,13 @@ public class SecurityConfig {
                 ).permitAll()
                 // Admin-only management endpoints (metrics, H2 console in dev)
                 .requestMatchers("/admin/**", "/actuator/**", "/h2-console/**").hasRole("ADMIN")
-                // Authenticated user endpoints (booking & seat reservation)
+                // Admins may pull any ticket PDF (support), but booking itself is a customer job
+                .requestMatchers("/reservations/*/ticket").authenticated()
                 .requestMatchers(
                     "/showtimes/*/seats",
                     "/reservations/**",
                     "/my-bookings"
-                ).authenticated()
+                ).hasRole("USER")
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
@@ -56,7 +57,7 @@ public class SecurityConfig {
                 .loginProcessingUrl("/login")
                 .usernameParameter("email")
                 .passwordParameter("password")
-                .defaultSuccessUrl("/", false)
+                .successHandler(loginSuccessHandler())
                 .failureUrl("/login?error=true")
                 .permitAll()
             )
@@ -72,5 +73,19 @@ public class SecurityConfig {
             );
 
         return http.build();
+    }
+
+    /** Admins land on the dashboard; customers go back to the page that asked them to sign in. */
+    private org.springframework.security.web.authentication.AuthenticationSuccessHandler loginSuccessHandler() {
+        var customerHandler = new org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler();
+        customerHandler.setDefaultTargetUrl("/");
+        return (request, response, authentication) -> {
+            boolean admin = authentication.getAuthorities().stream().anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+            if (admin) {
+                response.sendRedirect(request.getContextPath() + "/admin/dashboard");
+            } else {
+                customerHandler.onAuthenticationSuccess(request, response, authentication);
+            }
+        };
     }
 }

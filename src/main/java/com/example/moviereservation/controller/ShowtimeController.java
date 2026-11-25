@@ -4,6 +4,7 @@ import com.example.moviereservation.dto.SeatResponse;
 import com.example.moviereservation.entity.Showtime;
 import com.example.moviereservation.exception.ResourceNotFoundException;
 import com.example.moviereservation.repository.ShowtimeRepository;
+import com.example.moviereservation.service.ReservationService;
 import com.example.moviereservation.service.SeatService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,9 +41,23 @@ public class ShowtimeController {
                         Collectors.toList()
                 ));
 
+        // Seat-count popup: price per tier, and whether any seat in it is still free
+        Map<String, List<SeatResponse>> byTier = seats.stream()
+                .collect(Collectors.groupingBy(s -> s.seatType().name(), LinkedHashMap::new, Collectors.toList()));
+
+        // Other times of this film at the same cinema that day, for the time strip
+        List<Showtime> sameDay = showtimeRepository
+                .findByMovieIdAndStartTimeAfterOrderByStartTimeAsc(showtime.getMovie().getId(), LocalDateTime.now()).stream()
+                .filter(st -> st.getScreen().getTheater().getId().equals(showtime.getScreen().getTheater().getId())
+                        && st.getStartTime().toLocalDate().equals(showtime.getStartTime().toLocalDate()))
+                .toList();
+
         model.addAttribute("showtime", showtime);
         model.addAttribute("seats", seats);
         model.addAttribute("seatsByRow", seatsByRow);
+        model.addAttribute("seatTiers", byTier);
+        model.addAttribute("sameDayShowtimes", sameDay);
+        model.addAttribute("maxSeats", ReservationService.MAX_SEATS_PER_BOOKING);
         model.addAttribute("pageTitle", "Select Seats - " + showtime.getMovie().getTitle());
 
         return "seat-selection";

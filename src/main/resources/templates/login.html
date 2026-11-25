@@ -10,25 +10,22 @@
         <div class="auth-card">
             <!-- Card Header -->
             <div class="text-center mb-4">
-                <div class="d-inline-flex align-items-center justify-content-center p-3 rounded-circle mb-3" style="background: rgba(225, 54, 86, 0.1); border: 1px solid rgba(225, 54, 86, 0.25);">
-                    <i class="fa-solid fa-user-lock text-accent fs-3"></i>
-                </div>
-                <h3 class="fw-bold text-white mb-1">Welcome Back</h3>
-                <p class="text-secondary-subtle small">Sign in to manage your tickets, seats & bookings</p>
+                <h1 class="fs-4 mb-1">Sign in</h1>
+                <p class="text-body-secondary small">Book tickets and manage your bookings</p>
             </div>
 
             <!-- Status Alerts -->
-            <div th:if="${loginError != null or param.error != null}" class="alert alert-danger d-flex align-items-center gap-2 py-2 px-3 small rounded-3 mb-3" style="background: rgba(225, 54, 86, 0.15); color: #ff6b81; border: 1px solid rgba(225, 54, 86, 0.3);">
+            <div th:if="${loginError != null or param.error != null}" class="alert alert-danger d-flex align-items-center gap-2 py-2 px-3 small rounded-3 mb-3">
                 <i class="fa-solid fa-circle-exclamation"></i>
                 <span th:text="${loginError} ?: 'Invalid email or password. Please check your credentials.'">Invalid email or password.</span>
             </div>
 
-            <div th:if="${logoutSuccess != null or param.logout != null}" class="alert alert-info d-flex align-items-center gap-2 py-2 px-3 small rounded-3 mb-3" style="background: rgba(45, 156, 219, 0.15); color: #56ccf2; border: 1px solid rgba(45, 156, 219, 0.3);">
+            <div th:if="${logoutSuccess != null or param.logout != null}" class="alert alert-info d-flex align-items-center gap-2 py-2 px-3 small rounded-3 mb-3">
                 <i class="fa-solid fa-circle-check"></i>
                 <span th:text="${logoutSuccess} ?: 'You have been safely signed out.'">You have been signed out.</span>
             </div>
 
-            <div th:if="${registeredSuccess != null or param.registered != null}" class="alert alert-success d-flex align-items-center gap-2 py-2 px-3 small rounded-3 mb-3" style="background: rgba(46, 213, 115, 0.15); color: #2ed573; border: 1px solid rgba(46, 213, 115, 0.3);">
+            <div th:if="${registeredSuccess != null or param.registered != null}" class="alert alert-success d-flex align-items-center gap-2 py-2 px-3 small rounded-3 mb-3">
                 <i class="fa-solid fa-circle-check"></i>
                 <span th:text="${registeredSuccess} ?: 'Account registered successfully! Please log in.'">Account created successfully!</span>
             </div>
@@ -36,40 +33,40 @@
             <!-- Login Form (Spring Security Form Login) -->
             <form th:action="@{/login}" method="POST">
                 <div class="form-floating-custom mb-3">
-                    <label for="loginEmail"><i class="fa-solid fa-envelope me-1"></i> Email Address</label>
+                    <label for="loginEmail">Email</label>
                     <input type="email" name="email" class="form-control" id="loginEmail" placeholder="name@example.com" required autofocus>
                 </div>
 
                 <div class="form-floating-custom mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-1">
-                        <label for="loginPassword" class="mb-0"><i class="fa-solid fa-lock me-1"></i> Password</label>
+                        <label for="loginPassword" class="mb-0">Password</label>
                     </div>
                     <input type="password" name="password" class="form-control" id="loginPassword" placeholder="••••••••" required>
                 </div>
 
                 <div class="form-check mb-4">
-                    <input class="form-check-input bg-dark border-secondary" type="checkbox" id="rememberMe" checked>
-                    <label class="form-check-label text-secondary-subtle small" for="rememberMe">
+                    <input class="form-check-input" type="checkbox" id="rememberMe" checked>
+                    <label class="form-check-label text-body-secondary small" for="rememberMe">
                         Keep me signed in for 30 days
                     </label>
                 </div>
 
                 <button type="submit" class="btn btn-accent w-100 py-2 mb-3">
-                    <i class="fa-solid fa-right-to-bracket me-2"></i> Sign In to Account
+                    Sign in
                 </button>
 
                 <!-- Demo Credentials Quick Helper Box -->
                 <div th:if="${@environment.matchesProfiles('dev | demo')}"
-                     class="p-3 rounded-3 mb-4 text-start small" style="background: var(--bg-body); border: 1px dashed var(--border-subtle);">
-                    <div class="text-accent fw-bold mb-1"><i class="fa-solid fa-key me-1"></i> Demo Account:</div>
-                    <div class="text-secondary-subtle">
-                        <span class="text-white fw-semibold">User:</span> rahul.sharma@example.com / password123
+                     class="p-3 rounded-3 mb-4 text-start small" style="background: var(--bg-surface-elevated); border: 1px dashed var(--border-subtle);">
+                    <div class="fw-semibold mb-1">Demo account</div>
+                    <div class="text-body-secondary">
+                        <span class="text-body fw-semibold">User:</span> rahul.sharma@example.com / password123
                     </div>
                 </div>
 
-                <div class="text-center text-secondary-subtle small">
+                <div class="text-center text-body-secondary small">
                     Don't have an account yet? 
-                    <a th:href="@{/register}" class="text-accent fw-bold ms-1">Sign Up</a>
+                    <a th:href="@{/register}" class="text-accent fw-bold ms-1">Create one</a>
                 </div>
             </form>
         </div>

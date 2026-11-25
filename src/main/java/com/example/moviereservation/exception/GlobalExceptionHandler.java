@@ -27,7 +27,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public String handleNotFound(Exception ex, Model model) {
         model.addAttribute("errorCode", 404);
-        model.addAttribute("errorMessage", "Oops! The page or resource you requested does not exist.");
+        model.addAttribute("errorMessage", "The page you are looking for has moved or does not exist.");
         return "error";
     }
 

@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -341,6 +342,7 @@ public class DataLoader implements CommandLineRunner {
         log.info("Seeded sample reservation with booking reference CP-928410 and 2 seats (C4, C5)");
 
         seedAdditionalCitiesIfMissing();
+        topUpShowtimes();
         log.info("Dev Data Seeding successfully finished!");
     }
 
@@ -348,62 +350,66 @@ public class DataLoader implements CommandLineRunner {
         if (!theaterRepository.findByCityIgnoreCase("Delhi-NCR").isEmpty()) {
             return;
         }
-        log.info("Seeding theaters and showtimes for Delhi-NCR, Bengaluru, Hyderabad...");
+        log.info("Seeding theaters for Delhi-NCR, Bengaluru, Hyderabad...");
 
-        List<Screen> newScreens = List.of(
-                createTheaterWithScreen("PVR Director's Cut: Ambience Mall", "Vasant Kunj, New Delhi", "Delhi-NCR", 1),
-                createTheaterWithScreen("INOX: Nehru Place", "Eros Cinema Building, Nehru Place", "Delhi-NCR", 2),
-                createTheaterWithScreen("PVR: Forum Mall, Koramangala", "Hosur Road, Koramangala", "Bengaluru", 1),
-                createTheaterWithScreen("Cinepolis: Nexus Shantiniketan", "Whitefield Main Road", "Bengaluru", 3),
-                createTheaterWithScreen("AMB Cinemas: Gachibowli", "Sarath City Capital Mall, Gachibowli", "Hyderabad", 1)
-        );
-
-        seedShowtimes(newScreens);
+        createTheaterWithScreen("PVR Director's Cut: Ambience Mall", "Vasant Kunj, New Delhi", "Delhi-NCR", 1);
+        createTheaterWithScreen("INOX: Nehru Place", "Eros Cinema Building, Nehru Place", "Delhi-NCR", 2);
+        createTheaterWithScreen("PVR: Forum Mall, Koramangala", "Hosur Road, Koramangala", "Bengaluru", 1);
+        createTheaterWithScreen("Cinepolis: Nexus Shantiniketan", "Whitefield Main Road", "Bengaluru", 3);
+        createTheaterWithScreen("AMB Cinemas: Gachibowli", "Sarath City Capital Mall, Gachibowli", "Hyderabad", 1);
     }
 
+    // Real cinema-style slots; later shows cost more
+    public static final LocalTime[] SLOTS = {LocalTime.of(10, 15), LocalTime.of(13, 30), LocalTime.of(16, 45), LocalTime.of(20, 0), LocalTime.of(22, 45)};
+    private static final int[] SLOT_PRICES = {250, 300, 350, 420, 380};
+    public static final int DAYS_AHEAD = 3;
+
     /**
-     * Seeded showtimes are relative to boot time, so a long-running demo would run out of bookable shows.
-     * Daily (and on boot) re-adds shows on every screen once nothing is left in the next 24 hours.
+     * Keeps the next DAYS_AHEAD days scheduled, daily and on boot.
+     * A day counts as seeded once any show sits at its last slot.
      */
     @Scheduled(cron = "0 0 3 * * *")
     @Transactional
     public void topUpShowtimes() {
-        LocalDateTime now = LocalDateTime.now();
-        if (showtimeRepository.existsByStartTimeBetween(now, now.plusHours(24))) {
-            return;
+        List<Screen> screens = screenRepository.findAll();
+        for (int d = 0; d < DAYS_AHEAD; d++) {
+            LocalDate day = LocalDate.now().plusDays(d);
+            LocalDateTime lastSlot = day.atTime(SLOTS[SLOTS.length - 1]);
+            if (!showtimeRepository.existsByStartTimeBetween(lastSlot, lastSlot)) {
+                seedShowtimes(screens, day);
+            }
         }
-        log.info("No showtimes in the next 24h, topping up demo schedule...");
-        seedShowtimes(screenRepository.findAll());
     }
 
-    private void seedShowtimes(List<Screen> screens) {
-        List<Movie> movies = movieRepository.findAll();
-        if (movies.isEmpty()) {
-            return;
-        }
-
-        LocalDateTime now = LocalDateTime.now();
+    private void seedShowtimes(List<Screen> screens, LocalDate day) {
+        List<Movie> movies = movieRepository.findAll().stream()
+                .filter(m -> m.getReleaseDate() == null || !m.getReleaseDate().isAfter(day))
+                .toList();
+        LocalDateTime earliest = LocalDateTime.now().plusMinutes(30);
         List<Showtime> showtimes = new ArrayList<>();
-        for (Screen screen : screens) {
-            for (Movie movie : movies) {
-                showtimes.add(Showtime.builder()
-                        .startTime(now.plusHours(2))
-                        .endTime(now.plusHours(2).plusMinutes(movie.getDurationInMinutes() > 0 ? movie.getDurationInMinutes() : 120))
-                        .price(new BigDecimal("350.00"))
-                        .movie(movie)
-                        .screen(screen)
-                        .build());
-                showtimes.add(Showtime.builder()
-                        .startTime(now.plusHours(6))
-                        .endTime(now.plusHours(6).plusMinutes(movie.getDurationInMinutes() > 0 ? movie.getDurationInMinutes() : 120))
-                        .price(new BigDecimal("420.00"))
-                        .movie(movie)
-                        .screen(screen)
-                        .build());
+        for (int s = 0; s < screens.size(); s++) {
+            for (int m = 0; m < movies.size(); m++) {
+                Movie movie = movies.get(m);
+                int minutes = movie.getDurationInMinutes() != null && movie.getDurationInMinutes() > 0 ? movie.getDurationInMinutes() : 120;
+                // Two slots per movie per screen, rotated so theaters and days differ
+                int first = (m + s + day.getDayOfYear()) % SLOTS.length;
+                for (int k : new int[]{first, (first + 2) % SLOTS.length}) {
+                    LocalDateTime start = day.atTime(SLOTS[k]);
+                    if (start.isBefore(earliest)) {
+                        continue;
+                    }
+                    showtimes.add(Showtime.builder()
+                            .startTime(start)
+                            .endTime(start.plusMinutes(minutes))
+                            .price(BigDecimal.valueOf(SLOT_PRICES[k]))
+                            .movie(movie)
+                            .screen(screens.get(s))
+                            .build());
+                }
             }
         }
         showtimeRepository.saveAll(showtimes);
-        log.info("Seeded {} showtimes across {} screens", showtimes.size(), screens.size());
+        log.info("Seeded {} showtimes for {} across {} screens", showtimes.size(), day, screens.size());
     }
 
     private Screen createTheaterWithScreen(String name, String location, String city, int screenNum) {
