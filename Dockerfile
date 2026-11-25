@@ -3,6 +3,9 @@
 FROM maven:3.9.9-eclipse-temurin-17 AS build
 WORKDIR /app
 
+# Render's shared builders get 429 Too Many Requests from repo.maven.apache.org; Google's mirror of Maven Central does not
+RUN mkdir -p /root/.m2 && printf '<settings><mirrors><mirror><id>google-central</id><mirrorOf>central</mirrorOf><url>https://maven-central.storage-download.googleapis.com/maven2/</url></mirror></mirrors></settings>' > /root/.m2/settings.xml
+
 # Download dependencies first so code changes don't re-download them
 COPY pom.xml ./
 RUN mvn -B -q dependency:go-offline
