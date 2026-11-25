@@ -10,7 +10,32 @@ document.addEventListener('DOMContentLoaded', () => {
     initScrollButtons();
     initCountdownTimer();
     initLoadingStates();
+    initConfirmForms();
 });
+
+// Forms with data-confirm ask in the shared #confirmModal before submitting
+function initConfirmForms() {
+    const modalEl = document.getElementById('confirmModal');
+    if (!modalEl) return;
+    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+    let pendingForm = null;
+
+    document.addEventListener('submit', (e) => {
+        const form = e.target;
+        if (!form.dataset.confirm || form.dataset.confirmed) return;
+        e.preventDefault();
+        pendingForm = form;
+        document.getElementById('confirmModalText').textContent = form.dataset.confirm;
+        modal.show();
+    }, true);
+
+    document.getElementById('confirmModalOk').addEventListener('click', () => {
+        if (!pendingForm) return;
+        pendingForm.dataset.confirmed = 'true';
+        modal.hide();
+        pendingForm.requestSubmit();
+    });
+}
 
 // 1. Seat Selection Logic
 function initSeatSelection() {

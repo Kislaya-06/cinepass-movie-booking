@@ -1093,8 +1093,18 @@ a:hover {
   vertical-align: middle;
 }
 
-#citySelectModal {
+/* Backdrop is lifted to 1055 to cover the navbar, so every modal must sit above it */
+.modal {
   z-index: 1060 !important;
+}
+
+/* Used by every modal-content; these utilities were never defined, so modals rendered light */
+.bg-surface {
+  background-color: var(--bg-surface) !important;
+}
+
+.border-subtle {
+  border-color: var(--border-subtle) !important;
 }
 
 .modal-backdrop {

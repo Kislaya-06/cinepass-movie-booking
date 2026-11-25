@@ -74,6 +74,20 @@
         </div>
     </div>
 </footer>
+<!-- Styled stand-in for window.confirm(); any <form data-confirm="Question?"> opens it (main.js) -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalText" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-surface border border-subtle text-white">
+            <div class="modal-body p-4">
+                <p id="confirmModalText" class="mb-0 fs-6">Are you sure?</p>
+            </div>
+            <div class="modal-footer border-top border-subtle">
+                <button type="button" class="btn btn-outline-custom btn-sm" data-bs-dismiss="modal">No, go back</button>
+                <button type="button" class="btn btn-danger btn-sm" id="confirmModalOk">Yes, continue</button>
+            </div>
+        </div>
+    </div>
+</div>
 <!-- Every page needs these after the footer -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script th:src="@{/js/main.js}"></script>

@@ -108,8 +108,8 @@
 
                         <!-- Cancel Button (Allowed if CONFIRMED or PENDING) -->
                         <form th:if="${booking.status.name() == 'CONFIRMED' or booking.status.name() == 'PENDING'}"
-                              th:action="@{'/reservations/' + ${booking.id} + '/cancel'}" method="post" class="m-0">
-                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to cancel this reservation?')">
+                              th:action="@{'/reservations/' + ${booking.id} + '/cancel'}" method="post" class="m-0" data-confirm="Are you sure you want to cancel this reservation?">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">
                                 <i class="fa-solid fa-ban me-1"></i> Cancel Booking
                             </button>
                         </form>
