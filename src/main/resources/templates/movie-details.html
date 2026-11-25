@@ -33,6 +33,20 @@
                             <span class="btn btn-light btn-lg px-5 disabled" aria-disabled="true" th:text="${comingSoon} ? 'Releasing ' + ${#temporals.format(movie.releaseDate, 'dd MMM yyyy')} : 'No shows in ' + ${selectedCity}">No shows</span>
                             <button type="button" class="btn btn-link text-white" th:if="${!comingSoon}" data-bs-toggle="modal" data-bs-target="#citySelectModal">Change city</button>
                         </div>
+                        <div class="d-flex flex-wrap gap-2 mt-3">
+                            <button type="button" class="btn btn-glass btn-sm" th:if="${movie.trailerKey != null}"
+                                    data-bs-toggle="modal" data-bs-target="#trailerModal">
+                                <i class="fa-solid fa-play me-1" aria-hidden="true"></i> Watch trailer
+                            </button>
+                            <!-- No trailer from TMDb: fall back to a YouTube search -->
+                            <a class="btn btn-glass btn-sm" target="_blank" rel="noopener" th:unless="${movie.trailerKey != null}"
+                               th:href="${'https://www.youtube.com/results?search_query=' + #uris.escapeQueryParam(movie.title + ' official trailer')}">
+                                <i class="fa-solid fa-play me-1" aria-hidden="true"></i> Watch trailer
+                            </a>
+                            <button type="button" class="btn btn-glass btn-sm" data-share th:data-share-title="${movie.title} + ' on CinePass'">
+                                <i class="fa-solid fa-share-nodes me-1" aria-hidden="true"></i> <span>Share</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -42,6 +56,30 @@
             <section class="mb-5" style="max-width: 760px;">
                 <h2 class="section-title fs-4 mb-2">About the movie</h2>
                 <p class="text-body-secondary mb-0" th:text="${movie.description}">Description</p>
+            </section>
+
+            <section class="mb-5" th:unless="${movie.cast.isEmpty()}">
+                <h2 class="section-title fs-4 mb-3">Cast</h2>
+                <div class="people-row">
+                    <div class="person" th:each="p : ${movie.cast}">
+                        <img th:if="${p.photoUrl != null}" th:src="${p.photoUrl}" alt="" class="person-photo" loading="lazy">
+                        <span th:unless="${p.photoUrl != null}" class="person-photo person-photo-empty" aria-hidden="true"><i class="fa-solid fa-user"></i></span>
+                        <div class="person-name" th:text="${p.name}">Name</div>
+                        <div class="person-role" th:text="${p.role}">Role</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-5" th:unless="${movie.crew.isEmpty()}">
+                <h2 class="section-title fs-4 mb-3">Crew</h2>
+                <div class="people-row">
+                    <div class="person" th:each="p : ${movie.crew}">
+                        <img th:if="${p.photoUrl != null}" th:src="${p.photoUrl}" alt="" class="person-photo" loading="lazy">
+                        <span th:unless="${p.photoUrl != null}" class="person-photo person-photo-empty" aria-hidden="true"><i class="fa-solid fa-user"></i></span>
+                        <div class="person-name" th:text="${p.name}">Name</div>
+                        <div class="person-role" th:text="${p.role}">Role</div>
+                    </div>
+                </div>
             </section>
 
             <section th:unless="${similarMovies.isEmpty()}">
@@ -60,7 +98,7 @@
                             </div>
                             <div class="movie-card-body">
                                 <div class="movie-title" th:text="${m.title}" th:title="${m.title}">Movie title</div>
-                                <div class="movie-genres" th:text="${m.genre}">Genre</div>
+                                <div class="movie-genres" th:text="${m.language != null ? m.language + ' · ' + m.genre : m.genre}">English · Genre</div>
                             </div>
                         </a>
                     </div>
@@ -68,6 +106,19 @@
             </section>
         </div>
     </main>
+
+    <!-- Trailer: the iframe gets its src only while open (main.js), so nothing loads or plays in the background -->
+    <div class="modal fade" id="trailerModal" tabindex="-1" th:if="${movie.trailerKey != null}" th:aria-label="${movie.title} + ' trailer'" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content bg-black border-0">
+                <button type="button" class="btn-close btn-close-white trailer-close" data-bs-dismiss="modal" aria-label="Close trailer"></button>
+                <div class="ratio ratio-16x9">
+                    <iframe th:data-src="'https://www.youtube-nocookie.com/embed/' + ${movie.trailerKey} + '?autoplay=1&rel=0'" th:title="${movie.title} + ' trailer'"
+                            allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Shared Footer -->
     <div th:replace="~{fragments/footer :: footer}"></div>

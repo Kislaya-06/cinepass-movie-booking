@@ -8,22 +8,45 @@
     <main class="flex-grow-1 py-4">
         <div class="container-xl">
 
-            <!-- Featured film -->
-            <section class="hero-banner mb-4" th:if="${featuredMovie != null}">
-                <div class="hero-backdrop" th:style="'background-image: url(' + ${featuredMovie.posterUrl} + ');'"></div>
-                <div class="hero-content">
-                    <span class="hero-badge">Featured</span>
-                    <h1 class="display-6 mb-2" th:text="${featuredMovie.title}">Movie title</h1>
-                    <p class="text-body-secondary small mb-3">
-                        <span th:text="${featuredMovie.language}">English</span>
-                        <span th:if="${featuredMovie.durationInMinutes != null}" th:text="' · ' + ${featuredMovie.durationInMinutes / 60} + 'h ' + ${featuredMovie.durationInMinutes % 60} + 'm'"> · 2h 30m</span>
-                        <span th:text="' · ' + ${featuredMovie.genre}"> · Genre</span>
-                        <span th:if="${featuredMovie.rating != null}" th:text="' · ★ ' + ${#numbers.formatDecimal(featuredMovie.rating, 1, 1)} + '/10'"> · ★ 8.0/10</span>
-                    </p>
-                    <div class="d-none d-md-block mb-4"><p class="text-body-secondary mb-0" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;" th:text="${featuredMovie.description}">Description</p></div>
-                    <a th:href="@{'/movies/' + ${featuredMovie.id}}" class="btn btn-accent px-4">Book tickets</a>
+            <!-- Featured films: auto-advances (main.js) unless the viewer prefers reduced motion -->
+            <section id="heroCarousel" class="carousel slide hero-banner mb-4" th:unless="${featuredMovies.isEmpty()}"
+                     aria-roledescription="carousel" aria-label="Featured movies">
+                <div class="carousel-indicators" th:if="${featuredMovies.size() > 1}">
+                    <button type="button" th:each="m, it : ${featuredMovies}" data-bs-target="#heroCarousel" th:data-bs-slide-to="${it.index}"
+                            th:classappend="${it.first ? 'active' : ''}" th:aria-current="${it.first ? 'true' : null}"
+                            th:aria-label="'Show ' + ${m.title}"></button>
                 </div>
+                <div class="carousel-inner">
+                    <div class="carousel-item" th:each="m, it : ${featuredMovies}" th:classappend="${it.first ? 'active' : ''}"
+                         role="group" aria-roledescription="slide" th:aria-label="${it.count} + ' of ' + ${it.size}">
+                        <div class="hero-backdrop" th:style="'background-image: url(' + ${m.posterUrl} + ');'"></div>
+                        <div class="hero-slide">
+                            <div class="hero-content">
+                                <span class="hero-badge">In cinemas</span>
+                                <h2 class="hero-title" th:text="${m.title}">Movie title</h2>
+                                <p class="hero-meta">
+                                    <span th:if="${m.rating != null}"><i class="fa-solid fa-star text-gold" aria-hidden="true"></i> <span th:text="${#numbers.formatDecimal(m.rating, 1, 1)} + '/10'">8.0/10</span></span>
+                                    <span th:text="${m.language}">English</span>
+                                    <span th:if="${m.durationInMinutes != null}" th:text="${m.durationInMinutes / 60} + 'h ' + ${m.durationInMinutes % 60} + 'm'">2h 30m</span>
+                                    <span th:text="${m.genre}">Genre</span>
+                                </p>
+                                <p class="hero-desc d-none d-md-block" th:text="${m.description}">Description</p>
+                                <a th:href="@{'/movies/' + ${m.id}}" class="btn btn-accent btn-lg px-4">Book tickets</a>
+                            </div>
+                            <img class="hero-poster d-none d-md-block" th:src="${m.posterUrl}" alt="" th:attr="loading=${it.first ? 'eager' : 'lazy'}">
+                        </div>
+                    </div>
+                </div>
+                <th:block th:if="${featuredMovies.size() > 1}">
+                <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev" aria-label="Previous movie">
+                    <span class="hero-arrow" aria-hidden="true"><i class="fa-solid fa-chevron-left"></i></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next" aria-label="Next movie">
+                    <span class="hero-arrow" aria-hidden="true"><i class="fa-solid fa-chevron-right"></i></span>
+                </button>
+                </th:block>
             </section>
+            <h1 class="visually-hidden">Movies in cinemas</h1>
 
             <!-- Genre filter -->
             <nav class="filter-pills-row mb-4" aria-label="Filter by genre">
@@ -55,7 +78,7 @@
                             </div>
                             <div class="movie-card-body">
                                 <div class="movie-title" th:text="${movie.title}" th:title="${movie.title}">Movie title</div>
-                                <div class="movie-genres" th:text="${movie.genre}">Genre</div>
+                                <div class="movie-genres" th:text="${movie.language != null ? movie.language + ' · ' + movie.genre : movie.genre}">English · Genre</div>
                             </div>
                         </a>
                     </div>
@@ -80,7 +103,7 @@
                             </div>
                             <div class="movie-card-body">
                                 <div class="movie-title" th:text="${movie.title}" th:title="${movie.title}">Movie title</div>
-                                <div class="movie-genres" th:text="${movie.genre}">Genre</div>
+                                <div class="movie-genres" th:text="${movie.language != null ? movie.language + ' · ' + movie.genre : movie.genre}">English · Genre</div>
                             </div>
                         </a>
                     </div>

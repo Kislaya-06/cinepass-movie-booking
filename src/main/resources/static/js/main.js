@@ -240,3 +240,33 @@ function initLoadingStates() {
         document.getElementById('noSlotShows').classList.toggle('d-none', anyVisible);
     });
 })();
+
+// Home hero: auto-advance only when the viewer hasn't asked for less motion
+(function initHeroCarousel() {
+    const hc = document.getElementById('heroCarousel');
+    if (!hc || !window.bootstrap || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    bootstrap.Carousel.getOrCreateInstance(hc, { interval: 6000, pause: 'hover', ride: 'carousel' }).cycle();
+})();
+
+// Share buttons: native share sheet on phones, copy the link elsewhere
+document.addEventListener('click', async e => {
+    const btn = e.target.closest('[data-share]');
+    if (!btn) return;
+    const url = location.href.split('?')[0];
+    try {
+        if (navigator.share) return await navigator.share({ title: btn.dataset.shareTitle || document.title, url });
+        await navigator.clipboard.writeText(url);
+        const label = btn.querySelector('span');
+        label.textContent = 'Link copied';
+        setTimeout(() => { label.textContent = 'Share'; }, 2000);
+    } catch (_) { /* user closed the share sheet */ }
+});
+
+// Trailer modal: load the video on open, unload on close so playback stops
+(function initTrailerModal() {
+    const modal = document.getElementById('trailerModal');
+    if (!modal) return;
+    const frame = modal.querySelector('iframe');
+    modal.addEventListener('show.bs.modal', () => { frame.src = frame.dataset.src; });
+    modal.addEventListener('hidden.bs.modal', () => { frame.removeAttribute('src'); });
+})();

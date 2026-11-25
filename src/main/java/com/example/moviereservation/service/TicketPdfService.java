@@ -49,11 +49,11 @@ public class TicketPdfService {
     private static final DateTimeFormatter SHOW_TIME = DateTimeFormatter.ofPattern("hh:mm a");
     private static final DateTimeFormatter BOOKED_AT = DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm a");
 
-    private static final Color ACCENT = new Color(211, 41, 64);
-    private static final Color TEXT = new Color(27, 27, 31);
-    private static final Color MUTED = new Color(115, 115, 125);
-    private static final Color LINE = new Color(220, 220, 226);
-    private static final Color PANEL = new Color(246, 246, 248);
+    private static final Color ACCENT = new Color(179, 18, 46);
+    private static final Color TEXT = new Color(30, 20, 22);
+    private static final Color MUTED = new Color(116, 102, 106);
+    private static final Color LINE = new Color(232, 223, 212);
+    private static final Color PANEL = new Color(251, 247, 242);
 
     // Built-in Helvetica has no rupee glyph, so amounts print as "Rs."
     static String money(BigDecimal amount) {

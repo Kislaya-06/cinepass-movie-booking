@@ -56,7 +56,11 @@ public class MovieController {
                 .toList();
 
         // No fallbacks: filling an empty list with all movies showed the same films in both rows
-        model.addAttribute("featuredMovie", movies.isEmpty() ? null : movies.get(0));
+        // Hero carousel: the five best-rated films in cinemas now
+        model.addAttribute("featuredMovies", nowShowing.stream()
+                .sorted(java.util.Comparator.comparing(Movie::getRating, java.util.Comparator.nullsLast(java.util.Comparator.reverseOrder())))
+                .limit(5)
+                .toList());
         model.addAttribute("nowShowing", nowShowing);
         model.addAttribute("comingSoon", comingSoon);
         model.addAttribute("activeGenre", genre != null ? genre : "all");

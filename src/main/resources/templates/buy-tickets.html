@@ -7,7 +7,7 @@
 
     <main class="flex-grow-1">
         <!-- Film title and tags -->
-        <section class="bg-surface border-bottom">
+        <section class="bg-surface">
             <div class="container-xl pt-4 pb-3">
                 <a th:href="@{'/movies/' + ${movie.id}}" class="small text-body-secondary"><i class="fa-solid fa-arrow-left me-1" aria-hidden="true"></i>About the movie</a>
                 <h1 class="fs-3 mt-1 mb-2" th:text="${movie.title} + ' - (' + ${movie.language} + ')'">Movie - (English)</h1>
@@ -17,6 +17,10 @@
                 </div>
             </div>
 
+        </section>
+
+        <!-- Dates and filters stay pinned under the header while the cinema list scrolls -->
+        <div class="buy-sticky bg-surface border-bottom">
             <!-- Seven-day strip; days without shows are disabled -->
             <div class="container-xl">
                 <nav class="date-strip mb-0 pb-3" aria-label="Pick a date">
@@ -40,7 +44,7 @@
             <!-- Time-of-day filter (client side) and legend -->
             <div class="border-top">
                 <div class="container-xl d-flex flex-wrap align-items-center justify-content-between gap-2 py-2">
-                    <div class="d-flex flex-wrap gap-2" role="group" aria-label="Filter by show time" id="timeFilter">
+                    <div class="filter-pills-row" role="group" aria-label="Filter by show time" id="timeFilter">
                         <button type="button" class="filter-pill active" data-slot="all">All shows</button>
                         <button type="button" class="filter-pill" data-slot="morning">Morning</button>
                         <button type="button" class="filter-pill" data-slot="afternoon">Afternoon</button>
@@ -54,7 +58,7 @@
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
 
         <div class="container-xl py-4">
             <div th:if="${theaters.isEmpty()}" class="theater-card text-center py-5">

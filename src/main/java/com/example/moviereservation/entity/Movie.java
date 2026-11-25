@@ -1,6 +1,10 @@
 package com.example.moviereservation.entity;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OrderColumn;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -66,9 +70,27 @@ public class Movie extends BaseEntity {
     @Column(name = "rating")
     private Double rating;
 
+    /** YouTube video id of the official trailer, from TMDb. */
+    @Column(name = "trailer_key", length = 20)
+    private String trailerKey;
+
+    @ElementCollection
+    @CollectionTable(name = "movie_credits", joinColumns = @JoinColumn(name = "movie_id"))
+    @OrderColumn(name = "position")
+    @Builder.Default
+    private List<MovieCredit> credits = new ArrayList<>();
+
     @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default
     private List<Showtime> showtimes = new ArrayList<>();
+
+    public List<MovieCredit> getCast() {
+        return credits.stream().filter(c -> !c.isCrew()).toList();
+    }
+
+    public List<MovieCredit> getCrew() {
+        return credits.stream().filter(MovieCredit::isCrew).toList();
+    }
 
     public void addShowtime(Showtime showtime) {
         showtimes.add(showtime);

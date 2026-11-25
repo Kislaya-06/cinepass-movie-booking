@@ -151,13 +151,19 @@ public class TmdbMovieSyncService {
                         continue;
                     }
 
-                    // Avoid duplicate movies in catalog
-                    if (movieRepository.existsByTitleIgnoreCase(title)) {
+                    int tmdbId = item.path("id").asInt(0);
+
+                    // Avoid duplicate movies in catalog; films synced before credits existed get them now
+                    java.util.Optional<Movie> existing = movieRepository.findFirstByTitleIgnoreCase(title);
+                    if (existing.isPresent()) {
+                        Movie old = existing.get();
+                        if (old.getCredits().isEmpty() && old.getTrailerKey() == null) {
+                            applyDetails(old, fetchDetails(client, activeKey, tmdbId));
+                            movieRepository.save(old);
+                        }
                         skipped++;
                         continue;
                     }
-
-                    int tmdbId = item.path("id").asInt(0);
                     String overview = item.path("overview").asText("");
                     if (overview.length() > 2000) {
                         overview = overview.substring(0, 1997) + "...";
@@ -196,19 +202,18 @@ public class TmdbMovieSyncService {
                     }
                     String genre = genresList.isEmpty() ? "Drama" : String.join(", ", genresList);
 
-                    // Fetch accurate runtime from movie details if possible
-                    int runtimeMinutes = fetchRuntime(client, activeKey, tmdbId);
-
                     Movie movie = Movie.builder()
                             .title(title)
                             .description(overview)
                             .genre(genre)
                             .language(language)
-                            .durationInMinutes(runtimeMinutes > 0 ? runtimeMinutes : 120)
+                            .durationInMinutes(120)
                             .releaseDate(releaseDate)
                             .posterUrl(posterUrl)
                             .rating(rating)
                             .build();
+                    // Accurate runtime, cast, crew and trailer from the details endpoint
+                    applyDetails(movie, fetchDetails(client, activeKey, tmdbId));
 
                     Movie saved = movieRepository.save(movie);
                     imported++;
@@ -234,30 +239,79 @@ public class TmdbMovieSyncService {
                 .build();
     }
 
-    private int fetchRuntime(RestClient client, String apiKey, int tmdbId) {
+    private static final String PROFILE_BASE = "https://image.tmdb.org/t/p/w185";
+    private static final java.util.Set<String> CREW_JOBS = java.util.Set.of(
+            "Director", "Screenplay", "Writer", "Original Music Composer", "Director of Photography", "Producer");
+
+    /** Movie details with credits and videos in one call; null when TMDb has nothing for this id. */
+    private JsonNode fetchDetails(RestClient client, String apiKey, int tmdbId) {
         if (tmdbId <= 0) {
-            return 120;
+            return null;
         }
         try {
             String detailJson = client.get()
                     .uri(uriBuilder -> uriBuilder
                             .path("/movie/" + tmdbId)
                             .queryParam("api_key", apiKey)
+                            .queryParam("append_to_response", "credits,videos")
                             .build())
                     .retrieve()
                     .body(String.class);
-
-            if (detailJson != null) {
-                JsonNode detailNode = objectMapper.readTree(detailJson);
-                int runtime = detailNode.path("runtime").asInt(0);
-                if (runtime > 0) {
-                    return runtime;
-                }
-            }
+            return detailJson == null ? null : objectMapper.readTree(detailJson);
         } catch (Exception e) {
-            log.debug("Could not fetch runtime for tmdbId {}: {}", tmdbId, e.getMessage());
+            log.debug("Could not fetch details for tmdbId {}: {}", tmdbId, e.getMessage());
+            return null;
         }
-        return 120;
+    }
+
+    /** Copies runtime, top-billed cast, key crew and the official YouTube trailer onto the movie. */
+    static void applyDetails(Movie movie, JsonNode details) {
+        if (details == null) {
+            return;
+        }
+        int runtime = details.path("runtime").asInt(0);
+        if (runtime > 0) {
+            movie.setDurationInMinutes(runtime);
+        }
+
+        List<com.example.moviereservation.entity.MovieCredit> credits = new ArrayList<>();
+        for (JsonNode c : details.path("credits").path("cast")) {
+            if (credits.size() == 12) break;
+            credits.add(credit(c, c.path("character").asText(""), false));
+        }
+        java.util.Set<String> seenCrew = new java.util.HashSet<>();
+        for (JsonNode c : details.path("credits").path("crew")) {
+            String job = c.path("job").asText("");
+            // one card per person: a writer-director shows once, as director
+            if (CREW_JOBS.contains(job) && seenCrew.add(c.path("name").asText()) && seenCrew.size() <= 8) {
+                credits.add(credit(c, job, true));
+            }
+        }
+        movie.getCredits().clear();
+        movie.getCredits().addAll(credits);
+
+        String trailer = null;
+        for (JsonNode v : details.path("videos").path("results")) {
+            if (!"YouTube".equals(v.path("site").asText()) || !"Trailer".equals(v.path("type").asText())) continue;
+            if (trailer == null || v.path("official").asBoolean()) {
+                trailer = v.path("key").asText(null);
+                if (v.path("official").asBoolean()) break;
+            }
+        }
+        if (trailer != null && trailer.length() <= 20) {
+            movie.setTrailerKey(trailer);
+        }
+    }
+
+    private static com.example.moviereservation.entity.MovieCredit credit(JsonNode c, String role, boolean crew) {
+        String path = c.path("profile_path").asText("");
+        return new com.example.moviereservation.entity.MovieCredit(
+                truncate(c.path("name").asText(""), 150), truncate(role, 150),
+                path.isBlank() ? null : PROFILE_BASE + path, crew);
+    }
+
+    private static String truncate(String s, int max) {
+        return s.length() <= max ? s : s.substring(0, max);
     }
 
     private int scheduleSampleShowtimes(Movie movie, List<Screen> screens, int movieIndex) {
