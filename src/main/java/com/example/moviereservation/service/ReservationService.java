@@ -47,7 +47,8 @@ public class ReservationService {
         log.info("Processing reservation request for user ID {} on showtime ID {} with seats {}",
                 userId, showtimeId, seatIds);
 
-        User user = userRepository.findById(userId)
+        // Locked so parallel requests from one user can't both pass the hold-limit check below
+        User user = userRepository.findByIdForUpdate(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
 
         Showtime showtime = showtimeRepository.findById(showtimeId)

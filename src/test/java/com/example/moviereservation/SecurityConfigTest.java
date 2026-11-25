@@ -26,6 +26,9 @@ class SecurityConfigTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private com.example.moviereservation.repository.ReservationRepository reservationRepository;
+
     @Test
     void healthIsPublicAndFramesAreSameOriginOnly() throws Exception {
         mockMvc.perform(get("/actuator/health"))
@@ -65,6 +68,17 @@ class SecurityConfigTest {
                         .param("price", "200"))
                 .andExpect(status().isInternalServerError())
                 .andExpect(content().string(not(containsString("java.lang"))));
+    }
+
+    @Test
+    @WithUserDetails("rahul.sharma@example.com")
+    @org.springframework.transaction.annotation.Transactional
+    void paymentPageRedirectsForCancelledBooking() throws Exception {
+        // Seeded sample booking BMS-928410 belongs to Rahul and is CONFIRMED, i.e. not payable
+        Long id = reservationRepository.findByBookingReference("BMS-928410").orElseThrow().getId();
+        mockMvc.perform(get("/reservations/" + id + "/payment"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(header().string("Location", "/my-bookings"));
     }
 
     @Test

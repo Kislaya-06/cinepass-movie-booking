@@ -1,6 +1,7 @@
 package com.example.moviereservation.controller;
 
 import com.example.moviereservation.entity.Reservation;
+import com.example.moviereservation.entity.ReservationStatus;
 import com.example.moviereservation.entity.Role;
 import com.example.moviereservation.exception.ApplicationException;
 import com.example.moviereservation.exception.UnauthorizedActionException;
@@ -62,7 +63,8 @@ public class ReservationController {
             Model model
     ) {
         Reservation reservation = reservationService.getReservationByIdAndUser(id, userDetails.getId());
-        if (reservation == null) {
+        // Only an unpaid hold can be paid; cancelled/expired/confirmed ones belong in My Bookings
+        if (reservation == null || reservation.getStatus() != ReservationStatus.PENDING) {
             return "redirect:/my-bookings";
         }
 
