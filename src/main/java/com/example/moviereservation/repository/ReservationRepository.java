@@ -15,7 +15,12 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     List<Reservation> findByUserIdOrderByCreatedAtDesc(Long userId);
 
-    List<Reservation> findByStatus(ReservationStatus status);
+    // Admin table: one page at a time, with the row's user/movie/theater fetched in the same query (no N+1)
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"user", "showtime.movie", "showtime.screen.theater"})
+    org.springframework.data.domain.Page<Reservation> findByStatus(ReservationStatus status, org.springframework.data.domain.Pageable pageable);
+
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"user", "showtime.movie", "showtime.screen.theater"})
+    org.springframework.data.domain.Page<Reservation> findAllBy(org.springframework.data.domain.Pageable pageable);
 
     Optional<Reservation> findByBookingReference(String bookingReference);
 

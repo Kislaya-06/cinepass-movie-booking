@@ -34,6 +34,10 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,6 +52,8 @@ public class AdminController {
     private final TheaterRepository theaterRepository;
     private final ScreenRepository screenRepository;
     private final ShowtimeRepository showtimeRepository;
+    private static final int RESERVATIONS_PER_PAGE = 20;
+
     private final ReservationRepository reservationRepository;
     private final ObjectMapper objectMapper;
     private final TmdbMovieSyncService tmdbMovieSyncService;
@@ -57,6 +63,7 @@ public class AdminController {
     @GetMapping({"", "/", "/dashboard"})
     public String dashboard(
             @RequestParam(value = "status", required = false) ReservationStatus statusFilter,
+            @RequestParam(value = "page", defaultValue = "0") int page,
             Model model
     ) {
         long totalMovies = movieRepository.count();
@@ -65,9 +72,10 @@ public class AdminController {
         long totalShowtimes = showtimeRepository.count();
         long totalReservations = reservationRepository.count();
 
-        List<Reservation> allReservations = (statusFilter != null)
-                ? reservationRepository.findByStatus(statusFilter)
-                : reservationRepository.findAll();
+        PageRequest pageRequest = PageRequest.of(Math.max(page, 0), RESERVATIONS_PER_PAGE, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Reservation> reservationPage = (statusFilter != null)
+                ? reservationRepository.findByStatus(statusFilter, pageRequest)
+                : reservationRepository.findAllBy(pageRequest);
 
         BigDecimal totalRevenue = reservationRepository.sumTotalAmountByStatus(ReservationStatus.CONFIRMED);
 
@@ -118,7 +126,6 @@ public class AdminController {
         List<Movie> movies = movieRepository.findAll();
         List<Theater> theaters = theaterRepository.findAll();
         List<Screen> screens = screenRepository.findAll();
-        List<Showtime> showtimes = showtimeRepository.findAll();
 
         model.addAttribute("totalMovies", totalMovies);
         model.addAttribute("totalTheaters", totalTheaters);
@@ -146,8 +153,8 @@ public class AdminController {
         model.addAttribute("movies", movies);
         model.addAttribute("theaters", theaters);
         model.addAttribute("screens", screens);
-        model.addAttribute("showtimes", showtimes);
-        model.addAttribute("reservations", allReservations);
+        model.addAttribute("reservations", reservationPage.getContent());
+        model.addAttribute("reservationPage", reservationPage);
         model.addAttribute("statusFilter", statusFilter);
         model.addAttribute("pageTitle", "Admin Console - CinePass");
         model.addAttribute("isTmdbConfigured", tmdbMovieSyncService.isApiKeyConfigured());

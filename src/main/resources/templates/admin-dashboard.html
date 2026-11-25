@@ -200,7 +200,7 @@
                 <div class="d-flex flex-wrap justify-content-between align-items-center p-3 border-bottom gap-3" style="border-color: var(--border-subtle) !important;">
                     <div class="d-flex align-items-center gap-2">
                         <h5 class="fw-bold text-white mb-0"><i class="fa-solid fa-receipt text-accent me-2"></i> System Reservations</h5>
-                        <span class="badge bg-secondary" th:text="${reservations.size()}">0</span>
+                        <span class="badge bg-secondary" th:text="${reservationPage.totalElements}">0</span>
                     </div>
                     <div class="d-flex flex-wrap gap-2">
                         <a th:href="@{/admin/dashboard}" class="btn btn-sm btn-outline-custom" th:classappend="${statusFilter == null ? 'active' : ''}">
@@ -264,6 +264,21 @@
                         </tbody>
                     </table>
                 </div>
+                <nav th:if="${reservationPage.totalPages > 1}" aria-label="Reservations pages"
+                     class="d-flex justify-content-between align-items-center p-3 border-top small" style="border-color: var(--border-subtle) !important;">
+                    <span class="text-secondary-subtle"
+                          th:text="'Page ' + ${reservationPage.number + 1} + ' of ' + ${reservationPage.totalPages}">Page 1 of 3</span>
+                    <div class="d-flex gap-2">
+                        <a th:if="${reservationPage.hasPrevious()}" class="btn btn-sm btn-outline-custom"
+                           th:href="@{/admin/dashboard(status=${statusFilter}, page=${reservationPage.number - 1})} + '#bookings'">
+                            <i class="fa-solid fa-chevron-left me-1" aria-hidden="true"></i> Newer
+                        </a>
+                        <a th:if="${reservationPage.hasNext()}" class="btn btn-sm btn-outline-custom"
+                           th:href="@{/admin/dashboard(status=${statusFilter}, page=${reservationPage.number + 1})} + '#bookings'">
+                            Older <i class="fa-solid fa-chevron-right ms-1" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                </nav>
             </div>
 
             <!-- Current Movie Catalog Section -->
