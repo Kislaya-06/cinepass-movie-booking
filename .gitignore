@@ -1,0 +1,20 @@
+# Build output
+target/
+
+# Local H2 dev database (contains seeded users and bookings)
+data/
+
+# IDE / OS
+.vscode/
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Secrets / local env
+.env
+*.env
+application-local.yml
+
+# Logs
+*.log

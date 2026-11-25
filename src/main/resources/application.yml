@@ -1,0 +1,152 @@
+spring:
+  application:
+    name: movie-reservation-system
+  profiles:
+    active: dev
+  # dev/test build the schema with ddl-auto; only prod runs migrations
+  flyway:
+    enabled: false
+
+app:
+  server:
+    # Public URL of the site, used in ticket QR codes and emails (no trailing slash)
+    base-url: ${APP_BASE_URL:http://localhost:8080}
+  admin:
+    email: ${ADMIN_EMAIL:}
+    password: ${ADMIN_PASSWORD:}
+  reservation:
+    expiry-minutes: 10
+    expiry-check-interval: 60000
+  tmdb:
+    api-key: ${TMDB_API_KEY:}
+    base-url: https://api.tmdb.org/3
+    image-base-url: https://image.tmdb.org/t/p/w500
+
+---
+# ----------------------------------------------------
+# Development Profile (H2 In-Memory Database)
+# ----------------------------------------------------
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  datasource:
+    url: jdbc:h2:file:./data/movierestdb;AUTO_SERVER=TRUE
+    driverClassName: org.h2.Driver
+    username: sa
+    password: 
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: false
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  thymeleaf:
+    cache: false
+    mode: HTML
+    encoding: UTF-8
+
+
+
+  mail:
+    host: localhost
+    port: 1025
+    username: dev-mailer
+    password: 
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+  health:
+    mail:
+      enabled: false
+
+# Local-only admin; prod takes ADMIN_EMAIL / ADMIN_PASSWORD from the environment
+app:
+  admin:
+    email: admin@cinepass.com
+    password: admin123
+
+---
+# ----------------------------------------------------
+# Production Profile (PostgreSQL + Flyway migrations & Production SMTP)
+# ----------------------------------------------------
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  # No defaults on purpose: prod must fail fast if the DB env vars are missing
+  datasource:
+    url: ${DB_URL}
+    driverClassName: org.postgresql.Driver
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  flyway:
+    enabled: true
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+
+  thymeleaf:
+    cache: true
+    mode: HTML
+    encoding: UTF-8
+
+
+
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+server:
+  port: ${PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized

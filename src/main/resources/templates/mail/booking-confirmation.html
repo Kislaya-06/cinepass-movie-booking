@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Your CinePass Ticket Confirmation</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0b0b0f;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 30px auto;
+            background: #14141c;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: #1c1c28;
+            padding: 24px;
+            text-align: center;
+            border-bottom: 2px solid #e13656;
+        }
+        .header h1 {
+            color: #e13656;
+            margin: 0;
+            font-size: 26px;
+            letter-spacing: 1px;
+        }
+        .content {
+            padding: 24px;
+        }
+        .badge {
+            display: inline-block;
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 16px;
+        }
+        .movie-card {
+            background: #1a1a24;
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin: 16px 0;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 14px;
+        }
+        .info-label {
+            color: #9ca3af;
+        }
+        .info-val {
+            font-weight: bold;
+            color: #ffffff;
+        }
+        .total-row {
+            font-size: 18px;
+            color: #e13656;
+            font-weight: bold;
+            border-bottom: none;
+            padding-top: 12px;
+        }
+        .footer {
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #6b7280;
+            background: #0f0f15;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .btn {
+            display: inline-block;
+            background: #e13656;
+            color: #ffffff !important;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-weight: bold;
+            margin-top: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>CINEPASS</h1>
+            <p style="color: #9ca3af; margin: 4px 0 0 0; font-size: 13px;">Official Ticket Booking Confirmation</p>
+        </div>
+        <div class="content">
+            <div class="badge">CONFIRMED &amp; ISSUED</div>
+            <h2 style="margin-top: 0;">Hi, <span th:text="${userName}">Rahul</span>!</h2>
+            <p style="color: #d1d5db; line-height: 1.5;">
+                Your movie reservation has been successfully confirmed. Your official e-ticket PDF is attached to this email.
+            </p>
+
+            <div class="movie-card">
+                <h3 style="margin-top: 0; color: #ffffff;" th:text="${movieTitle}">Dune: Part Two</h3>
+                <div class="info-row">
+                    <span class="info-label">Booking Reference</span>
+                    <span class="info-val" style="color: #e13656; letter-spacing: 1px;" th:text="${bookingReference}">BMS-1234ABCD</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Cinema</span>
+                    <span class="info-val" th:text="${theaterName} + ' (Screen ' + ${screenNumber} + ')'">PVR ICON - Screen 1</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Date &amp; Showtime</span>
+                    <span class="info-val" th:text="${showtime}">14 Sep, 08:30 PM</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Allocated Seats</span>
+                    <span class="info-val" th:text="${seats}">A1, A2</span>
+                </div>
+                <div class="info-row total-row">
+                    <span class="info-label" style="color: #ffffff;">Total Amount</span>
+                    <span class="info-val" th:text="'₹' + ${totalAmount}">₹750</span>
+                </div>
+            </div>
+
+            <p style="text-align: center;">
+                <a th:href="${verifyUrl}" class="btn">View Digital Pass Online</a>
+            </p>
+        </div>
+        <div class="footer">
+            <p>Please carry a digital or printed copy of the attached PDF ticket when arriving at the theatre.</p>
+            <p>&copy; CinePass Entertainment. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
